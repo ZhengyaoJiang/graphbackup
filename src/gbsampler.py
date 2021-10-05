@@ -177,6 +177,7 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, aggr
                     for action in freq.freq[s].keys():
                         for r, next_state in freq.freq[s][action]:  # loop though different possibilities
                             new_trans.add((s, action, r, next_state))
+            target_states.extend([t[-1] for t in new_trans])
             if len(new_trans) > breath:
                 new_trans = list(new_trans)
                 counts = [freq.freq[t[0]][t[1]][t[2:]] for t in new_trans]
@@ -184,11 +185,9 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, aggr
                 new_trans = choices(new_trans, weights=prob, k=breath)
                 sa.extend([t[:2] for t in new_trans])
                 new_s = set([t[-1] for t in new_trans])
-                target_states.extend([t[-1] for t in new_trans])
             else:
                 sa.extend([t[:2] for t in new_trans])
                 new_s = set([t[-1] for t in new_trans])
-                target_states.extend([t[-1] for t in new_trans])
 
         states_array = torch.tensor(np.stack(s2i.get_states(target_states))).to(states)
         qs = agent.target(states_array, None, None)
@@ -200,10 +199,10 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, aggr
             for r, next_state in freq.freq[state][action]:  # loop though different possibilities
                 count = freq.freq[state][action][(r, next_state)]
                 overall_count += count
-                done = True
                 if next_state in freq.freq:
-                    done = False
-                v += count * (r + discount * aggregate_q(i2q[next_state])*(1-done))
+                    v += count * (r + discount * aggregate_q(i2q[next_state]))
+                else:
+                    v += count * r
             i2q[state][action] = v / overall_count
         targets.append(i2q[source_idx])
     return torch.tensor(np.array(targets))
