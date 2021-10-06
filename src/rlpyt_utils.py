@@ -115,6 +115,7 @@ class MinibatchRlEvalWandb(MinibatchRlEval):
         )
         self.itr_batch_size = self.sampler.batch_spec.size * world_size
         n_itr = self.get_n_itr()
+
         self.agent.to_device(self.affinity.get("cuda_idx", None))
         if world_size > 1:
             self.agent.data_parallel()
