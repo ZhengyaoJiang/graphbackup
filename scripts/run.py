@@ -88,6 +88,7 @@ if __name__ == "__main__":
     parser.add_argument('--num-logs', type=int, default=100)
     parser.add_argument('--renormalize', type=int, default=1)
     parser.add_argument('--dueling', type=int, default=1)
+    parser.add_argument('--double', type=int, default=1)
     parser.add_argument('--replay-ratio', type=int, default=64)
     parser.add_argument('--dynamics-blocks', type=int, default=0)
     parser.add_argument('--residual-tm', type=int, default=0.)

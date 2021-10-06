@@ -38,6 +38,7 @@ def set_config(args, game):
     config["algo"]["clip_grad_norm"] = args.max_grad_norm
     config['algo']['pri_alpha'] = 0.5
     config['algo']['pri_beta_steps'] = int(10e4)
+    config['algo']['double_dqn'] = args.double
     config['optim']['eps'] = 0.00015
     config["sampler"]["eval_max_trajectories"] = 100
     config["sampler"]["eval_n_envs"] = 100

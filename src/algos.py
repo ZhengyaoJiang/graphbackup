@@ -30,7 +30,6 @@ EPS = 1e-6  # (NaN-guard)
 class SPRCategoricalDQN(CategoricalDQN):
     """Distributional DQN with fixed probability bins for the Q-value of each
     action, a.k.a. categorical."""
-
     def __init__(self,
                  t0_spr_loss_weight=1.,
                  model_rl_weight=1.,
@@ -38,6 +37,7 @@ class SPRCategoricalDQN(CategoricalDQN):
                  model_spr_weight=1.,
                  time_offset=0,
                  distributional=1,
+                 double_dqn=1,
                  jumps=0,
                  backup="graph",
                  collector=None,
@@ -52,6 +52,7 @@ class SPRCategoricalDQN(CategoricalDQN):
         self.time_offset = time_offset
         self.jumps = jumps
         self.gb_collector = collector
+        self.double_dqn=double_dqn
 
         if backup == "n-step-Q":
             if not distributional:
