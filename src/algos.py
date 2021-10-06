@@ -37,7 +37,7 @@ class SPRCategoricalDQN(CategoricalDQN):
                  model_spr_weight=1.,
                  time_offset=0,
                  distributional=1,
-                 double_dqn=1,
+                 double=1,
                  jumps=0,
                  backup="graph",
                  collector=None,
@@ -46,13 +46,14 @@ class SPRCategoricalDQN(CategoricalDQN):
         self.opt_info_fields = tuple(f for f in ModelOptInfo._fields)  # copy
         self.t0_spr_loss_weight = t0_spr_loss_weight
         self.model_spr_weight = model_spr_weight
+        self.double_dqn = double
 
         self.reward_loss_weight = reward_loss_weight
         self.model_rl_weight = model_rl_weight
         self.time_offset = time_offset
         self.jumps = jumps
         self.gb_collector = collector
-        self.double_dqn=double_dqn
+        self.double_dqn=double
 
         if backup == "n-step-Q":
             if not distributional:
