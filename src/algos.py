@@ -170,17 +170,18 @@ class SPRCategoricalDQN(CategoricalDQN):
         return opt_info
 
     def bg_rl_loss(self, qs, samples, index):
-        q = select_at_indexes(samples.all_action[index+1], qs).cpu()
+        q = select_at_indexes(samples.all_action[index+1], qs)
         with torch.no_grad():
-            target_q = graph_limited_backup(self.agent, self.gb_collector.transition_freq, samples.all_observation[index],
+            target_q = graph_limited_backup(self.agent, self.gb_collector.transition_freq,
+                                            samples.all_observation[index].to(q),
                                             self.gb_collector.s2i, discount=self.discount,
-                                            breath=10, depth=10).to(q)
+                                            breath=10, depth=10)
 
             #disc_target_q = (self.discount ** self.n_step_return) * target_q
             #y = samples.return_[index] + (1 - samples.done_n[index].float()) * disc_target_q
-            y = select_at_indexes(samples.all_action[index+1], target_q).cpu()
+            y = select_at_indexes(samples.all_action[index+1], target_q)
 
-        delta = y - q
+        delta = y - q.cpu()
         losses = 0.5 * delta ** 2
         abs_delta = abs(delta)
         if self.delta_clip > 0:  # Huber loss.
