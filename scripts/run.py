@@ -98,6 +98,7 @@ if __name__ == "__main__":
     parser.add_argument('--dropout', type=float, default=0., help='Dropout probability in convnet.')
     parser.add_argument('--spr', type=int, default=1)
     parser.add_argument('--distributional', type=int, default=1)
+    parser.add_argument('--double', type=int, default=1)
     parser.add_argument('--delta-clip', type=float, default=1., help="Huber Delta")
     parser.add_argument('--prioritized-replay', type=int, default=1)
     parser.add_argument('--momentum-encoder', type=int, default=1)

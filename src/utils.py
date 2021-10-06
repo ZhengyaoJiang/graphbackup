@@ -84,6 +84,7 @@ def set_config(args, game):
     config["algo"]["t0_spr_loss_weight"] = args.t0_spr_loss_weight
     config["algo"]["time_offset"] = args.time_offset
     config["algo"]["distributional"] = args.distributional
+    config["algo"]["double"] = args.double
     config["algo"]["delta_clip"] = args.delta_clip
     config["algo"]["prioritized_replay"] = args.prioritized_replay
     config["algo"]["backup"] = args.backup
