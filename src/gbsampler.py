@@ -165,11 +165,13 @@ def q2v(q, policy="greedy", epsilon=0.02):
 def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, aggregate_q=q2v):
     targets = []
     source_idxes = s2i.get_indexes(states)
+    sa_all = []
+    target_states = []
 
     for source_idx in source_idxes:
         new_s = {source_idx}
         sa = []
-        target_states = [source_idx]
+        target_states.append(source_idx)
         for step in range(depth):
             new_trans = set()
             for s in new_s:
@@ -188,11 +190,14 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, aggr
             else:
                 sa.extend([t[:2] for t in new_trans])
                 new_s = set([t[-1] for t in new_trans])
+        sa_all.append((source_idx, sa))
 
-        states_array = torch.tensor(np.stack(s2i.get_states(target_states))).to(states)
-        qs = agent.target(states_array, None, None)
-        i2q = {s: qs[i].cpu().numpy() for i, s in enumerate(target_states)}
+    target_states = list(set(target_states))
+    states_array = torch.tensor(np.stack(s2i.get_states(target_states))).to(states)
+    qs = agent.target(states_array, None, None)
+    i2q = {s: qs[i].cpu().numpy() for i, s in enumerate(target_states)}
 
+    for source_idx, sa, in sa_all:
         for state, action in reversed(sa):
             v = 0
             overall_count = 0
