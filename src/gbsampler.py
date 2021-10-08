@@ -198,16 +198,87 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, aggr
     i2q = {s: qs[i].cpu().numpy() for i, s in enumerate(target_states)}
 
     for source_idx, sa, in sa_all:
+        i2q_temp = {}
         for state, action in reversed(sa):
+            if state not in i2q_temp:
+                i2q_temp[state] = i2q[state].copy()
             v = 0
             overall_count = 0
             for r, next_state in freq.freq[state][action]:  # loop though different possibilities
                 count = freq.freq[state][action][(r, next_state)]
                 overall_count += count
                 if next_state in freq.freq:
-                    v += count * (r + discount * aggregate_q(i2q[next_state]))
+                    if next_state not in i2q_temp:
+                        i2q_temp[next_state] = i2q[next_state].copy()
+                    v += count * (r + discount * aggregate_q(i2q_temp[next_state]))
                 else:
                     v += count * r
-            i2q[state][action] = v / overall_count
-        targets.append(i2q[source_idx])
+            i2q_temp[state][action] = v / overall_count
+        targets.append(i2q_temp[source_idx])
+    return torch.tensor(np.array(targets))
+
+
+def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath, depth, aggregate_q=q2v):
+    targets = []
+    source_idxes = s2i.get_indexes(states)
+    sa_all = []
+    target_states = []
+
+    for source_idx in source_idxes:
+        new_s = {source_idx}
+        sa = []
+        target_states.append(source_idx)
+        for step in range(depth):
+            new_trans = set()
+            for s in new_s:
+                if s in freq.freq:
+                    for action in freq.freq[s].keys():
+                        for r, next_state in freq.freq[s][action]:  # loop though different possibilities
+                            new_trans.add((s, action, r, next_state))
+            target_states.extend([t[-1] for t in new_trans])
+            if len(new_trans) > breath:
+                new_trans = list(new_trans)
+                counts = [freq.freq[t[0]][t[1]][t[2:]] for t in new_trans]
+                prob = counts
+                new_trans = choices(new_trans, weights=prob, k=breath)
+                sa.extend([t[:2] for t in new_trans])
+                new_s = set([t[-1] for t in new_trans])
+            else:
+                sa.extend([t[:2] for t in new_trans])
+                new_s = set([t[-1] for t in new_trans])
+        sa_all.append((source_idx, sa))
+
+    target_states = list(set(target_states))
+    states_array = torch.tensor(np.stack(s2i.get_states(target_states))).to(states)
+    qs = agent.target(states_array, None, None)
+    i2q = {s: qs[i].cpu().numpy() for i, s in enumerate(target_states)}
+
+    for n,(source_idx, sa) in enumerate(sa_all):
+        i2v = {}
+        for state, _ in reversed(sa):
+            v = 0
+            overall_count = 0
+            for action in freq.freq[state]:
+                for r, next_state in freq.freq[state][action]:  # loop through different possibilities
+                    count = freq.freq[state][action][(r, next_state)]
+                    overall_count += count
+                    if next_state in freq.freq:
+                        if next_state in i2v:
+                            v += count * (r + discount * i2v[next_state])
+                        else:
+                            v += aggregate_q(i2q[next_state])
+                    else:
+                        v += count * r
+            i2v[state] = v / overall_count
+        source_action = actions[n]
+        target = 0
+        overall_count = 0
+        for r, next_state in freq.freq[source_idx][source_action]:  # loop through different possibilities
+            count = freq.freq[source_idx][source_action][(r, next_state)]
+            overall_count += count
+            if next_state in freq.freq:
+                target += count * (r + discount * i2v[next_state])
+            else:
+                target += count * r
+        targets.append(target/overall_count)
     return torch.tensor(np.array(targets))

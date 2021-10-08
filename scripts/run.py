@@ -136,7 +136,7 @@ if __name__ == "__main__":
     parser.add_argument('--max-grad-norm', type=float, default=10., help='Max Grad Norm')
     parser.add_argument('--public', action='store_true', help='If set, uses anonymous wandb logging')
     parser.add_argument('--disable_cuda', action='store_true')
-    parser.add_argument('--backup', type=str, default='n-step-Q', choices=["n-step-Q", "graph"])
+    parser.add_argument('--backup', type=str, default='n-step-Q', choices=["n-step-Q", "graph", "graph-mixed"])
     args = parser.parse_args()
 
     build_and_train(game=args.game,

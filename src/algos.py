@@ -9,7 +9,7 @@ from rlpyt.utils.logging import logger
 from src.rlpyt_buffer import AsyncPrioritizedSequenceReplayFrameBufferExtended, \
     AsyncUniformSequenceReplayFrameBufferExtended
 from src.models import from_categorical, to_categorical
-from src.gbsampler import graph_limited_backup
+from src.gbsampler import graph_limited_backup, graph_mixed_backup
 SamplesToBuffer = namedarraytuple("SamplesToBuffer",
     ["observation", "action", "reward", "done"])
 ModelSamplesToBuffer = namedarraytuple("SamplesToBuffer",
@@ -61,7 +61,10 @@ class SPRCategoricalDQN(CategoricalDQN):
             else:
                 self.rl_loss = self.dist_rl_loss
         elif backup == "graph":
-            self.rl_loss = self.bg_rl_loss
+            self.rl_loss = self.gb_rl_loss
+        elif backup == "graph-mixed":
+            self.rl_loss = self.gb_mixed_rl_loss
+
 
     def initialize_replay_buffer(self, examples, batch_spec, async_=False):
         example_to_buffer = ModelSamplesToBuffer(
@@ -169,7 +172,28 @@ class SPRCategoricalDQN(CategoricalDQN):
         self.update_itr_hyperparams(itr)
         return opt_info
 
-    def bg_rl_loss(self, qs, samples, index):
+    def gb_mixed_rl_loss(self, qs, samples, index):
+        q = select_at_indexes(samples.all_action[index+1], qs)
+        with torch.no_grad():
+            y = graph_mixed_backup(self.agent, self.gb_collector.transition_freq,
+                                            samples.all_observation[index].to(q),
+                                            samples.all_action[index+1].cpu().numpy(),
+                                            self.gb_collector.s2i, discount=self.discount,
+                                            breath=10, depth=10)
+            #disc_target_q = (self.discount ** self.n_step_return) * target_q
+            #y = samples.return_[index] + (1 - samples.done_n[index].float()) * disc_target_q
+        delta = y - q.cpu()
+        losses = 0.5 * delta ** 2
+        abs_delta = abs(delta)
+        if self.delta_clip > 0:  # Huber loss.
+            b = self.delta_clip * (abs_delta - self.delta_clip / 2)
+            losses = torch.where(abs_delta <= self.delta_clip, losses, b)
+        td_abs_errors = abs_delta.detach()
+        if self.delta_clip > 0:
+            td_abs_errors = torch.clamp(td_abs_errors, 0, self.delta_clip)
+        return losses, td_abs_errors
+
+    def gb_rl_loss(self, qs, samples, index):
         q = select_at_indexes(samples.all_action[index+1], qs)
         with torch.no_grad():
             target_q = graph_limited_backup(self.agent, self.gb_collector.transition_freq,
