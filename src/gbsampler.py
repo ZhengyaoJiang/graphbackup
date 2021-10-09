@@ -277,7 +277,10 @@ def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath, dept
             count = freq.freq[source_idx][source_action][(r, next_state)]
             overall_count += count
             if next_state in freq.freq:
-                target += count * (r + discount * i2v[next_state])
+                if next_state in i2v:
+                    target += count * (r + discount * i2v[next_state])
+                else:
+                    overall_count -= count
             else:
                 target += count * r
         targets.append(target/overall_count)
