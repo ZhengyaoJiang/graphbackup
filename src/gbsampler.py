@@ -231,16 +231,17 @@ def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath, dept
         target_states.append(source_idx)
         for step in range(depth):
             new_trans = set()
+            for s in new_s:
+                if s in freq.freq:
+                    for action in freq.freq[s].keys():
+                        for r, next_state in freq.freq[s][action]:  # loop though different possibilities
+                            new_trans.add((s, action, r, next_state))
+            target_states.extend([t[-1] for t in new_trans])
             if step == 0: # only expand source action in source state
+                new_trans = set()
                 for r, next_state in freq.freq[source_idx][actions[n]]:  # loop though different possibilities
                     new_trans.add((source_idx, actions[n], r, next_state))
-            else:
-                for s in new_s:
-                    if s in freq.freq:
-                        for action in freq.freq[s].keys():
-                            for r, next_state in freq.freq[s][action]:  # loop though different possibilities
-                                new_trans.add((s, action, r, next_state))
-            target_states.extend([t[-1] for t in new_trans])
+
             if len(new_trans) > breath:
                 new_trans = list(new_trans)
                 counts = [freq.freq[t[0]][t[1]][t[2:]] for t in new_trans]
