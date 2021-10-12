@@ -224,17 +224,22 @@ def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath, dept
     sa_all = []
     target_states = []
 
-    for source_idx in source_idxes:
+    for n, source_idx in enumerate(source_idxes):
         new_s = {source_idx}
+        #sa = [(source_idx, actions[n])]
         sa = []
         target_states.append(source_idx)
         for step in range(depth):
             new_trans = set()
-            for s in new_s:
-                if s in freq.freq:
-                    for action in freq.freq[s].keys():
-                        for r, next_state in freq.freq[s][action]:  # loop though different possibilities
-                            new_trans.add((s, action, r, next_state))
+            if depth == 0: # only expand source action in source state
+                for r, next_state in freq.freq[source_idx][actions[n]]:  # loop though different possibilities
+                    new_trans.add((source_idx, actions[n], r, next_state))
+            else:
+                for s in new_s:
+                    if s in freq.freq:
+                        for action in freq.freq[s].keys():
+                            for r, next_state in freq.freq[s][action]:  # loop though different possibilities
+                                new_trans.add((s, action, r, next_state))
             target_states.extend([t[-1] for t in new_trans])
             if len(new_trans) > breath:
                 new_trans = list(new_trans)
@@ -279,7 +284,7 @@ def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath, dept
             if next_state in freq.freq:
                 if next_state in i2v:
                     target += count * (r + discount * i2v[next_state])
-                else:
+                else: # dealing with nodes that are not expanded
                     overall_count -= count
             else:
                 target += count * r
