@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 
 from rlpyt.utils.collections import namedarraytuple
 from collections import namedtuple
@@ -64,6 +65,8 @@ class SPRCategoricalDQN(CategoricalDQN):
             self.rl_loss = self.gb_rl_loss
         elif backup == "graph-mixed":
             self.rl_loss = self.gb_mixed_rl_loss
+        elif backup == "tree":
+            self.rl_loss = self.tb_rl_loss
 
 
     def initialize_replay_buffer(self, examples, batch_spec, async_=False):
@@ -183,6 +186,36 @@ class SPRCategoricalDQN(CategoricalDQN):
             #disc_target_q = (self.discount ** self.n_step_return) * target_q
             #y = samples.return_[index] + (1 - samples.done_n[index].float()) * disc_target_q
         delta = y - q.cpu()
+        losses = 0.5 * delta ** 2
+        abs_delta = abs(delta)
+        if self.delta_clip > 0:  # Huber loss.
+            b = self.delta_clip * (abs_delta - self.delta_clip / 2)
+            losses = torch.where(abs_delta <= self.delta_clip, losses, b)
+        td_abs_errors = abs_delta.detach()
+        if self.delta_clip > 0:
+            td_abs_errors = torch.clamp(td_abs_errors, 0, self.delta_clip)
+        return losses, td_abs_errors
+
+    def tb_rl_loss(self, qs, samples, index):
+        q = select_at_indexes(samples.all_action[index+1], qs)
+        with torch.no_grad():
+            states = samples.all_observation[index:index + self.n_step_return]
+            shp = states.shape
+            states_flatten = np.reshape(states, (shp[0]*shp[1],)+shp[2:])
+            target_qs = self.agent.target(states_flatten,
+                                          None, None).cpu().numpy()  # [N,B,A,P']
+            target_qs = np.reshape(target_qs, shp[:2]+(-1,))
+            for step in reversed(range(1, self.n_step_return)):
+                action = samples.all_action[index+step]
+                rewards = samples.all_reward[index+step]
+                updated_target = rewards + self.discount*(1-samples.all_done[index+step-1].float())*np.max(target_qs[step], axis=1)
+                target_qs[step-1,:,action] = updated_target.cpu().numpy()
+
+            #disc_target_q = (self.discount ** self.n_step_return) * target_q
+            #y = samples.return_[index] + (1 - samples.done_n[index].float()) * disc_target_q
+            y = target_qs[0][range(shp[1]),action]
+
+        delta = torch.tensor(y) - q.cpu()
         losses = 0.5 * delta ** 2
         abs_delta = abs(delta)
         if self.delta_clip > 0:  # Huber loss.
