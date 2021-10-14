@@ -42,6 +42,7 @@ class SPRCategoricalDQN(CategoricalDQN):
                  jumps=0,
                  backup="graph",
                  collector=None,
+                 breath=10,
                  **kwargs):
         super().__init__(**kwargs)
         self.opt_info_fields = tuple(f for f in ModelOptInfo._fields)  # copy
@@ -55,6 +56,7 @@ class SPRCategoricalDQN(CategoricalDQN):
         self.jumps = jumps
         self.gb_collector = collector
         self.double_dqn=double
+        self.breath = breath
 
         if backup == "n-step-Q":
             if not distributional:
@@ -182,7 +184,7 @@ class SPRCategoricalDQN(CategoricalDQN):
                                             samples.all_observation[index].to(q),
                                             samples.all_action[index+1].cpu().numpy(),
                                             self.gb_collector.s2i, discount=self.discount,
-                                            breath=10, depth=10)
+                                            breath=self.breath, depth=self.n_step_return)
             #disc_target_q = (self.discount ** self.n_step_return) * target_q
             #y = samples.return_[index] + (1 - samples.done_n[index].float()) * disc_target_q
         delta = y - q.cpu()
@@ -232,7 +234,7 @@ class SPRCategoricalDQN(CategoricalDQN):
             target_q = graph_limited_backup(self.agent, self.gb_collector.transition_freq,
                                             samples.all_observation[index].to(q),
                                             self.gb_collector.s2i, discount=self.discount,
-                                            breath=10, depth=10)
+                                            breath=self.breath, depth=self.n_step_return)
 
             #disc_target_q = (self.discount ** self.n_step_return) * target_q
             #y = samples.return_[index] + (1 - samples.done_n[index].float()) * disc_target_q
