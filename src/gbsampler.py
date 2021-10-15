@@ -165,7 +165,7 @@ def q2v(q, policy="greedy", epsilon=0.02):
     elif policy == "epsilon_greedy":
         return np.max(q)*(1-epsilon) + np.sum(epsilon/torch.sum(q.shape)*q)
 
-def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, aggregate_q=q2v):
+def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, double, aggregate_q=q2v):
     targets = []
     source_idxes = s2i.get_indexes(states)
     sa_all = []
@@ -181,7 +181,7 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, aggr
                 if s in freq.freq:
                     for action in freq.freq[s].keys():
                         for r, d, next_state in freq.freq[s][action]:  # loop though different possibilities
-                            new_trans.add((s, action, r, next_state))
+                            new_trans.add((s, action, r, d, next_state))
             target_states.extend([t[-1] for t in new_trans])
             if len(new_trans) > breath:
                 new_trans = list(new_trans)
@@ -197,8 +197,11 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, aggr
 
     target_states = list(set(target_states))
     states_array = torch.tensor(np.stack(s2i.get_states(target_states))).to(states)
-    qs = agent.target(states_array, None, None)
-    i2q = {s: qs[i].cpu().numpy() for i, s in enumerate(target_states)}
+    qs = agent.target(states_array, None, None).cpu()
+    i2q = {s: qs[i].numpy() for i, s in enumerate(target_states)}
+    if double:
+        q_online = agent(states_array, None, None).cpu().detach()
+        i2max = {s: torch.argmax(q_online[i]).numpy() for i, s in enumerate(target_states)}
 
     for source_idx, sa, in sa_all:
         i2q_temp = {}
@@ -213,7 +216,10 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, aggr
                 if not d:
                     if next_state not in i2q_temp:
                         i2q_temp[next_state] = i2q[next_state].copy()
-                    v += count * (r + discount * aggregate_q(i2q_temp[next_state]))
+                    if double:
+                        v += count * (r + discount * i2q_temp[next_state][i2max[next_state]])
+                    else:
+                        v += count * (r + discount * aggregate_q(i2q_temp[next_state]))
                 else:
                     v += count * r
             i2q_temp[state][action] = v / overall_count
@@ -238,12 +244,12 @@ def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath, dept
                 if s in freq.freq:
                     for action in freq.freq[s].keys():
                         for r, d, next_state in freq.freq[s][action]:  # loop though different possibilities
-                            new_trans.add((s, action, r, next_state))
+                            new_trans.add((s, action, r, d, next_state))
             target_states.extend([t[-1] for t in new_trans])
             if step == 0: # only expand source action in source state
                 new_trans = set()
                 for r, d, next_state in freq.freq[source_idx][actions[n]]:  # loop though different possibilities
-                    new_trans.add((source_idx, actions[n], r, next_state))
+                    new_trans.add((source_idx, actions[n], r, d, next_state))
 
             if len(new_trans) > breath:
                 new_trans = list(new_trans)

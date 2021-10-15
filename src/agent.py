@@ -23,10 +23,13 @@ class SPRAgent(AtariCatDqnAgent):
                 device=self.device)
             return self.model(*model_inputs, train=train)
         else:
-            prev_action = self.distribution.to_onehot(prev_action)
-            model_inputs = buffer_to((observation, prev_action, prev_reward),
-                device=self.device)
-            return self.model(*model_inputs).cpu()
+            if prev_reward:
+                prev_action = self.distribution.to_onehot(prev_action)
+                model_inputs = buffer_to((observation, prev_action, prev_reward),
+                    device=self.device)
+                return self.model(*model_inputs).cpu()
+            else:
+                return self.model(observation, None, None).cpu()
 
     def initialize(self,
                    env_spaces,

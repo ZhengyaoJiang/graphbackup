@@ -234,7 +234,8 @@ class SPRCategoricalDQN(CategoricalDQN):
             target_q = graph_limited_backup(self.agent, self.gb_collector.transition_freq,
                                             samples.all_observation[index].to(q),
                                             self.gb_collector.s2i, discount=self.discount,
-                                            breath=self.breath, depth=self.n_step_return)
+                                            breath=self.breath, depth=self.n_step_return,
+                                            double=self.double_dqn)
 
             #disc_target_q = (self.discount ** self.n_step_return) * target_q
             #y = samples.return_[index] + (1 - samples.done_n[index].float()) * disc_target_q
