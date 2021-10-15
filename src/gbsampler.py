@@ -56,7 +56,7 @@ class TransitionFreq():
         self.freq = {}
         self.transition_count = 0
 
-    def append(self, s, a, r, s1):
+    def append(self, s, a, r, d, s1):
         self.transition_count += 1
         s = int(s)
         a = int(a)
@@ -65,9 +65,9 @@ class TransitionFreq():
             self.freq[s] = {}
         if a not in self.freq[s]:
             self.freq[s][a] = {}
-        if (r, s1) not in self.freq[s][a]:
-            self.freq[s][a][(r,s1)] = 0
-        self.freq[s][a][(r,s1)] += 1
+        if (r, d, s1) not in self.freq[s][a]:
+            self.freq[s][a][(r, d, s1)] = 0
+        self.freq[s][a][(r, d, s1)] += 1
 
 
 class CpuResetGraphCollector(DecorrelatingStartCollector):
@@ -128,7 +128,7 @@ class CpuResetGraphCollector(DecorrelatingStartCollector):
 
             self.s2i.append_state(o)
             s1_idx = self.s2i.get_index(o)
-            self.transition_freq.append(s_idx, action[b], r, s1_idx)
+            self.transition_freq.append(s_idx, action[b], r, d, s1_idx)
             s_idx = s1_idx
 
             traj_infos[b].step(observation[b], action[b], r, d, agent_info[b],
@@ -137,6 +137,9 @@ class CpuResetGraphCollector(DecorrelatingStartCollector):
                 completed_infos.append(traj_infos[b].terminate(o))
                 traj_infos[b] = self.TrajInfoCls()
                 o = env.reset()
+
+                self.s2i.append_state(o)
+                s_idx = self.s2i.get_index(o)
             if d:
                 self.agent.reset_one(idx=b)
             observation[b] = o
@@ -177,7 +180,7 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, aggr
             for s in new_s:
                 if s in freq.freq:
                     for action in freq.freq[s].keys():
-                        for r, next_state in freq.freq[s][action]:  # loop though different possibilities
+                        for r, d, next_state in freq.freq[s][action]:  # loop though different possibilities
                             new_trans.add((s, action, r, next_state))
             target_states.extend([t[-1] for t in new_trans])
             if len(new_trans) > breath:
@@ -204,10 +207,10 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, aggr
                 i2q_temp[state] = i2q[state].copy()
             v = 0
             overall_count = 0
-            for r, next_state in freq.freq[state][action]:  # loop though different possibilities
-                count = freq.freq[state][action][(r, next_state)]
+            for r, d, next_state in freq.freq[state][action]:  # loop though different possibilities
+                count = freq.freq[state][action][(r, d, next_state)]
                 overall_count += count
-                if next_state in freq.freq:
+                if not d:
                     if next_state not in i2q_temp:
                         i2q_temp[next_state] = i2q[next_state].copy()
                     v += count * (r + discount * aggregate_q(i2q_temp[next_state]))
@@ -234,12 +237,12 @@ def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath, dept
             for s in new_s:
                 if s in freq.freq:
                     for action in freq.freq[s].keys():
-                        for r, next_state in freq.freq[s][action]:  # loop though different possibilities
+                        for r, d, next_state in freq.freq[s][action]:  # loop though different possibilities
                             new_trans.add((s, action, r, next_state))
             target_states.extend([t[-1] for t in new_trans])
             if step == 0: # only expand source action in source state
                 new_trans = set()
-                for r, next_state in freq.freq[source_idx][actions[n]]:  # loop though different possibilities
+                for r, d, next_state in freq.freq[source_idx][actions[n]]:  # loop though different possibilities
                     new_trans.add((source_idx, actions[n], r, next_state))
 
             if len(new_trans) > breath:
@@ -265,10 +268,10 @@ def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath, dept
             v = 0
             overall_count = 0
             for action in freq.freq[state]:
-                for r, next_state in freq.freq[state][action]:  # loop through different possibilities
-                    count = freq.freq[state][action][(r, next_state)]
+                for r, d, next_state in freq.freq[state][action]:  # loop through different possibilities
+                    count = freq.freq[state][action][(r, d, next_state)]
                     overall_count += count
-                    if next_state in freq.freq:
+                    if not d:
                         if next_state in i2v:
                             v += count * (r + discount * i2v[next_state])
                         else:
@@ -279,10 +282,10 @@ def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath, dept
         source_action = actions[n]
         target = 0
         overall_count = 0
-        for r, next_state in freq.freq[source_idx][source_action]:  # loop through different possibilities
-            count = freq.freq[source_idx][source_action][(r, next_state)]
+        for r, d, next_state in freq.freq[source_idx][source_action]:  # loop through different possibilities
+            count = freq.freq[source_idx][source_action][(r, d, next_state)]
             overall_count += count
-            if next_state in freq.freq:
+            if not d:
                 if next_state in i2v:
                     target += count * (r + discount * i2v[next_state])
                 else: # dealing with nodes that are not expanded
