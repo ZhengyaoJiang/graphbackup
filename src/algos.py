@@ -201,17 +201,19 @@ class SPRCategoricalDQN(CategoricalDQN):
     def tb_rl_loss(self, qs, samples, index):
         q = select_at_indexes(samples.all_action[index+1], qs)
         with torch.no_grad():
-            states = samples.all_observation[index:index + self.n_step_return]
+            states = samples.all_observation[index:index + self.n_step_return+1]
             shp = states.shape
             states_flatten = np.reshape(states, (shp[0]*shp[1],)+shp[2:])
             target_qs = self.agent.target(states_flatten,
                                           None, None).cpu().numpy()  # [N,B,A,P']
             target_qs = np.reshape(target_qs, shp[:2]+(-1,))
-            for step in reversed(range(1, self.n_step_return)):
+            for step in reversed(range(1, self.n_step_return+1)):
                 action = samples.all_action[index+step]
                 rewards = samples.all_reward[index+step]
-                updated_target = rewards + self.discount*(1-samples.all_done[index+step-1].float())*np.max(target_qs[step], axis=1)
+                updated_target = rewards + self.discount*(1-samples.all_done[index+step].float())*np.max(target_qs[step], axis=1)
                 target_qs[step-1,range(shp[1]),action] = updated_target.cpu().numpy()
+            #if np.any(samples.all_done.numpy()):
+            #    print()
 
             #disc_target_q = (self.discount ** self.n_step_return) * target_q
             #y = samples.return_[index] + (1 - samples.done_n[index].float()) * disc_target_q
