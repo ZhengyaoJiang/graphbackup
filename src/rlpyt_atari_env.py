@@ -6,6 +6,7 @@ import numpy as np
 import os
 import atari_py
 import cv2
+import matplotlib.pyplot as plt
 from collections import namedtuple
 from gym.utils import seeding
 
@@ -160,12 +161,8 @@ class AtariEnv(Env):
 
     def render(self, wait=10, show_full_obs=False):
         """Shows game screen via cv2, with option to show all frames in observation."""
-        img = self.get_obs()
-        if show_full_obs:
-            shape = img.shape
-            img = img.reshape(shape[0] * shape[1], shape[2])
-        else:
-            img = img[-1]
+        img = self.ale.getScreenRGB()
+
         cv2.imshow(self._game, img)
         cv2.waitKey(wait)
 

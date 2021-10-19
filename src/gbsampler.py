@@ -126,6 +126,7 @@ class CpuResetGraphCollector(DecorrelatingStartCollector):
             env = self.envs[b]
             o, r, d, env_info = env.step(action[b])
 
+            #env.render()
             self.s2i.append_state(o)
             s1_idx = self.s2i.get_index(o)
             self.transition_freq.append(s_idx, action[b], r, d, s1_idx)
@@ -140,8 +141,10 @@ class CpuResetGraphCollector(DecorrelatingStartCollector):
 
                 self.s2i.append_state(o)
                 s_idx = self.s2i.get_index(o)
+                #print("end game")
             if d:
                 self.agent.reset_one(idx=b)
+                #print("end life")
             observation[b] = o
             reward[b] = r
             env_buf.done[t, b] = d

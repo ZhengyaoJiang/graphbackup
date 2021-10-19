@@ -1,5 +1,5 @@
 import torch
-from rlpyt.agents.dqn.atari.atari_catdqn_agent import AtariCatDqnAgent
+from src.rlpyt.rlpyt.agents.dqn.atari.atari_catdqn_agent import AtariCatDqnAgent
 from rlpyt.utils.buffer import buffer_to
 from rlpyt.utils.collections import namedarraytuple
 AgentInputs = namedarraytuple("AgentInputs",

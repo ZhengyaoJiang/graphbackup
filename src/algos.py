@@ -211,7 +211,7 @@ class SPRCategoricalDQN(CategoricalDQN):
                 action = samples.all_action[index+step]
                 rewards = samples.all_reward[index+step]
                 updated_target = rewards + self.discount*(1-samples.all_done[index+step-1].float())*np.max(target_qs[step], axis=1)
-                target_qs[step-1,:,action] = updated_target.cpu().numpy()
+                target_qs[step-1,range(shp[1]),action] = updated_target.cpu().numpy()
 
             #disc_target_q = (self.discount ** self.n_step_return) * target_q
             #y = samples.return_[index] + (1 - samples.done_n[index].float()) * disc_target_q
@@ -232,7 +232,7 @@ class SPRCategoricalDQN(CategoricalDQN):
         q = select_at_indexes(samples.all_action[index+1], qs)
         with torch.no_grad():
             target_q = graph_limited_backup(self.agent, self.gb_collector.transition_freq,
-                                            samples.all_observation[index].to(q),
+                                            samples.all_observation[index],
                                             self.gb_collector.s2i, discount=self.discount,
                                             breath=self.breath, depth=self.n_step_return,
                                             double=self.double_dqn)
