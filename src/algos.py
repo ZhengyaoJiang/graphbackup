@@ -181,7 +181,7 @@ class SPRCategoricalDQN(CategoricalDQN):
         q = select_at_indexes(samples.all_action[index+1], qs)
         with torch.no_grad():
             y = graph_mixed_backup(self.agent, self.gb_collector.transition_freq,
-                                            samples.all_observation[index].to(q),
+                                            samples.all_observation[index],
                                             samples.all_action[index+1].cpu().numpy(),
                                             self.gb_collector.s2i, discount=self.discount,
                                             breath=self.breath, depth=self.n_step_return)
