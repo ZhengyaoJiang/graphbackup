@@ -284,7 +284,7 @@ def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath, dept
                         if next_state in i2v:
                             v += count * (r + discount * i2v[next_state])
                         else:
-                            v += aggregate_q(i2q[next_state])
+                            v += count * (r + discount * aggregate_q(i2q[next_state]))
                     else:
                         v += count * r
             i2v[state] = v / overall_count
