@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 from random import choices
+from rlpyt.utils.tensor import select_at_indexes, valid_mean
 from rlpyt.samplers.collectors import (DecorrelatingStartCollector,
     BaseEvalCollector)
 from rlpyt.agents.base import AgentInputs
@@ -168,7 +169,7 @@ def q2v(q, policy="greedy", epsilon=0.02):
     elif policy == "epsilon_greedy":
         return np.max(q)*(1-epsilon) + np.sum(epsilon/torch.sum(q.shape)*q)
 
-def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, double, aggregate_q=q2v):
+def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, double, dist, aggregate_q=q2v):
     targets = []
     source_idxes = s2i.get_indexes(states)
     sa_all = []
@@ -230,7 +231,7 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, doub
     return torch.tensor(np.array(targets))
 
 
-def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath, depth, aggregate_q=q2v):
+def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath, depth, double, dist, aggregate_q=q2v):
     targets = []
     source_idxes = s2i.get_indexes(states)
     sa_all = []
@@ -296,10 +297,43 @@ def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath, dept
             overall_count += count
             if not d:
                 if next_state in i2v:
-                    target += count * (r + discount * i2v[next_state])
+                    target += count * value_backup()
                 else: # dealing with nodes that are not expanded
                     overall_count -= count
             else:
-                target += count * r
+                target += count * value_backup()
         targets.append(target/overall_count)
     return torch.tensor(np.array(targets))
+
+
+
+def value_backup(target_q, q_idx, rewards, dones, double_dqn, discount):
+    if double_dqn:
+        return rewards + (1-dones)*discount*target_q[q_idx]
+    else:
+        return rewards + (1-dones)*discount*(torch.argmax(target_q, dim=-1))
+
+
+def dist_backup(target_ps, q_idx, rewards, dones, double_dqn, v_min, v_max, n_atoms, discount):
+    delta_z = (v_max - v_min) / (n_atoms - 1)
+    z = torch.linspace(v_min, v_max, n_atoms)
+    next_z = z * discount  # [P']
+    next_z = torch.ger(1 - dones.float(), next_z)  # [B,P']
+    ret = rewards.unsqueeze(1)  # [B,1]
+    next_z = torch.clamp(ret + next_z, v_min, v_max)  # [B,P']
+
+    z_bc = z.view(1, -1, 1)  # [1,P,1]
+    next_z_bc = next_z.unsqueeze(1)  # [B,1,P']
+    abs_diff_on_delta = abs(next_z_bc - z_bc) / delta_z
+    projection_coeffs = torch.clamp(1 - abs_diff_on_delta, 0, 1)
+
+    with torch.no_grad():
+        if double_dqn:
+            next_a = q_idx
+        else:
+            target_qs = torch.tensordot(target_ps, z, dims=1)  # [B,A]
+            next_a = torch.argmax(target_qs, dim=-1)  # [B]
+        target_p_unproj = select_at_indexes(next_a, target_ps)  # [B,P']
+        target_p_unproj = target_p_unproj.unsqueeze(1)  # [B,1,P']
+        target_p = (target_p_unproj * projection_coeffs).sum(-1)
+    return target_p

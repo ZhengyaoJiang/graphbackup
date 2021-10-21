@@ -10,7 +10,10 @@ from rlpyt.utils.logging import logger
 from src.rlpyt_buffer import AsyncPrioritizedSequenceReplayFrameBufferExtended, \
     AsyncUniformSequenceReplayFrameBufferExtended
 from src.models import from_categorical, to_categorical
-from src.gbsampler import graph_limited_backup, graph_mixed_backup
+from src.gbsampler import graph_limited_backup, graph_mixed_backup, value_backup, dist_backup
+from functools import partial
+
+
 SamplesToBuffer = namedarraytuple("SamplesToBuffer",
     ["observation", "action", "reward", "done"])
 ModelSamplesToBuffer = namedarraytuple("SamplesToBuffer",
@@ -57,6 +60,7 @@ class SPRCategoricalDQN(CategoricalDQN):
         self.gb_collector = collector
         self.double_dqn=double
         self.breath = breath
+        self.distributional = distributional
 
         if backup == "n-step-Q":
             if not distributional:
@@ -69,6 +73,12 @@ class SPRCategoricalDQN(CategoricalDQN):
             self.rl_loss = self.gb_mixed_rl_loss
         elif backup == "tree":
             self.rl_loss = self.tb_rl_loss
+
+        if distributional:
+            self.one_step_backup = partial(dist_backup, double_dqn=double, v_min=self.V_min, v_max=self.V_max,
+                                           n_atoms=self.agent.n_atoms, discount=self.discount)
+        else:
+            self.one_step_backup = partial(value_backup, double_dqn=double, discount=self.discount)
 
 
     def initialize_replay_buffer(self, examples, batch_spec, async_=False):
@@ -204,14 +214,26 @@ class SPRCategoricalDQN(CategoricalDQN):
             states = samples.all_observation[index:index + self.n_step_return+1]
             shp = states.shape
             states_flatten = np.reshape(states, (shp[0]*shp[1],)+shp[2:])
+            prev_rewards = samples.all_reward[index:index + self.n_step_return+1]
+            prev_rewards = np.reshape(prev_rewards, (shp[0]*shp[1]))
+            prev_actions = samples.all_action[index:index + self.n_step_return+1]
+            prev_actions = np.reshape(prev_actions, (shp[0]*shp[1]))
             target_qs = self.agent.target(states_flatten,
-                                          None, None).cpu().numpy()  # [N,B,A,P']
+                                          prev_actions, prev_rewards)  # [N,B,A,P']
             target_qs = np.reshape(target_qs, shp[:2]+(-1,))
+            target_qs_array = target_qs.cpu().numpy()
+            if self.double_dqn:
+                q_idx = self.agent(states_flatten, prev_actions, prev_rewards)
+            else:
+                q_idx = None
+
             for step in reversed(range(1, self.n_step_return+1)):
                 action = samples.all_action[index+step]
                 rewards = samples.all_reward[index+step]
-                updated_target = rewards + self.discount*(1-samples.all_done[index+step].float())*np.max(target_qs[step], axis=1)
-                target_qs[step-1,range(shp[1]),action] = updated_target.cpu().numpy()
+                dones = samples.all_done[index+step].float()
+
+                updated_target = self.one_step_backup(target_qs[index+step], q_idx, rewards, dones)
+                target_qs_array[step-1,range(shp[1]),action] = updated_target.cpu().numpy()
             #if np.any(samples.all_done.numpy()):
             #    print()
 
