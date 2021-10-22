@@ -169,7 +169,7 @@ def q2v(q, policy="greedy", epsilon=0.02):
     elif policy == "epsilon_greedy":
         return np.max(q)*(1-epsilon) + np.sum(epsilon/torch.sum(q.shape)*q)
 
-def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, double, dist, aggregate_q=q2v):
+def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, double, dist, one_step_backup):
     targets = []
     source_idxes = s2i.get_indexes(states)
     sa_all = []
@@ -202,36 +202,37 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, doub
     target_states = list(set(target_states))
     states_array = torch.tensor(np.stack(s2i.get_states(target_states))).to(states)
     qs = agent.target(states_array, None, None).cpu()
-    i2q = {s: qs[i].numpy() for i, s in enumerate(target_states)}
+    i2q = {s: qs[i].cpu() for i, s in enumerate(target_states)}
     if double:
         q_online = agent(states_array, None, None).cpu().detach()
-        i2max = {s: torch.argmax(q_online[i]).numpy() for i, s in enumerate(target_states)}
+        if dist:
+            z = torch.linspace(agent.V_min, agent.V_max, agent.n_atoms)
+            q_online = torch.tensordot(q_online, z, dims=1)
+        i2max = {s: torch.argmax(q_online[i]) for i, s in enumerate(target_states)}
+    else:
+        i2max = None
 
     for source_idx, sa, in sa_all:
         i2q_temp = {}
         for state, action in reversed(sa):
             if state not in i2q_temp:
-                i2q_temp[state] = i2q[state].copy()
+                i2q_temp[state] = torch.clone(i2q[state])
             v = 0
             overall_count = 0
             for r, d, next_state in freq.freq[state][action]:  # loop though different possibilities
                 count = freq.freq[state][action][(r, d, next_state)]
                 overall_count += count
-                if not d:
-                    if next_state not in i2q_temp:
-                        i2q_temp[next_state] = i2q[next_state].copy()
-                    if double:
-                        v += count * (r + discount * i2q_temp[next_state][i2max[next_state]])
-                    else:
-                        v += count * (r + discount * aggregate_q(i2q_temp[next_state]))
-                else:
-                    v += count * r
+                if next_state not in i2q_temp:
+                    i2q_temp[next_state] = torch.clone(i2q[next_state])
+                idx = i2max[next_state] if double else None
+                v += count * one_step_backup(i2q_temp[next_state], idx, torch.tensor(r), torch.tensor(d))
             i2q_temp[state][action] = v / overall_count
         targets.append(i2q_temp[source_idx])
-    return torch.tensor(np.array(targets))
+    return torch.stack(targets)
 
 
-def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath, depth, double, dist, aggregate_q=q2v):
+def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath,
+                       depth, double, dist, one_step_backup):
     targets = []
     source_idxes = s2i.get_indexes(states)
     sa_all = []
@@ -270,7 +271,16 @@ def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath, dept
     target_states = list(set(target_states))
     states_array = torch.tensor(np.stack(s2i.get_states(target_states))).to(states)
     qs = agent.target(states_array, None, None)
-    i2q = {s: qs[i].cpu().numpy() for i, s in enumerate(target_states)}
+    i2q = {s: qs[i].cpu() for i, s in enumerate(target_states)}
+    if double:
+        q_online = agent(states_array, None, None)
+        if dist:
+            z = torch.linspace(agent.V_min, agent.V_max, agent.n_atoms)
+            q_online = torch.tensordot(q_online, z, dims=1)
+        i2max = {s: torch.argmax(q_online[i]) for i, s in enumerate(target_states)}
+    else:
+        i2max = None
+
 
     for n,(source_idx, sa) in enumerate(sa_all):
         i2v = {}
@@ -281,13 +291,17 @@ def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath, dept
                 for r, d, next_state in freq.freq[state][action]:  # loop through different possibilities
                     count = freq.freq[state][action][(r, d, next_state)]
                     overall_count += count
-                    if not d:
-                        if next_state in i2v:
-                            v += count * (r + discount * i2v[next_state])
-                        else:
-                            v += count * (r + discount * aggregate_q(i2q[next_state]))
+
+                    if next_state in i2v:
+                        next_value = i2v[next_state]
+                        v += count * one_step_backup(next_value, None, torch.tensor(r), torch.tensor(d),
+                                                     state_value=True)
                     else:
-                        v += count * r
+                        next_value = i2q[next_state]
+                        idx = i2max[next_state] if double else None
+                        v += count * one_step_backup(next_value, idx, torch.tensor(r), torch.tensor(d),
+                                                     state_value=False)
+
             i2v[state] = v / overall_count
         source_action = actions[n]
         target = 0
@@ -295,26 +309,39 @@ def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath, dept
         for r, d, next_state in freq.freq[source_idx][source_action]:  # loop through different possibilities
             count = freq.freq[source_idx][source_action][(r, d, next_state)]
             overall_count += count
-            if not d:
-                if next_state in i2v:
-                    target += count * value_backup()
-                else: # dealing with nodes that are not expanded
-                    overall_count -= count
+            if not d and next_state not in i2v:
+                overall_count -= count
             else:
-                target += count * value_backup()
+                if d:
+                    next_value = torch.zeros_like(i2v[source_idx])
+                else:
+                    next_value = i2v[next_state]
+                target += count * one_step_backup(next_value, None, torch.tensor(r), torch.tensor(d),
+                                                  state_value=True)
+
         targets.append(target/overall_count)
-    return torch.tensor(np.array(targets))
+    return torch.stack(targets)
 
 
 
-def value_backup(target_q, q_idx, rewards, dones, double_dqn, discount):
+def value_backup(target_q, q_idx, rewards, dones, double_dqn, discount, state_value=False):
+    if state_value:
+        return rewards + (1-dones.float())*discount*target_q
+
     if double_dqn:
-        return rewards + (1-dones)*discount*target_q[q_idx]
+        return rewards + (1-dones.float())*discount*target_q[q_idx]
     else:
-        return rewards + (1-dones)*discount*(torch.argmax(target_q, dim=-1))
+        return rewards + (1-dones.float())*discount*torch.max(target_q, dim=-1)[0]
 
 
-def dist_backup(target_ps, q_idx, rewards, dones, double_dqn, v_min, v_max, n_atoms, discount):
+def dist_backup(target_ps, q_idx, rewards, dones, double_dqn, v_min, v_max, n_atoms, discount, state_value=False):
+    if len(rewards.shape) == 0:
+        target_ps = target_ps.unsqueeze(0)
+        rewards = rewards.unsqueeze(0)
+        dones = dones.unsqueeze(0)
+        if double_dqn and not state_value:
+            q_idx = q_idx.unsqueeze(0)
+
     delta_z = (v_max - v_min) / (n_atoms - 1)
     z = torch.linspace(v_min, v_max, n_atoms)
     next_z = z * discount  # [P']
@@ -333,7 +360,13 @@ def dist_backup(target_ps, q_idx, rewards, dones, double_dqn, v_min, v_max, n_at
         else:
             target_qs = torch.tensordot(target_ps, z, dims=1)  # [B,A]
             next_a = torch.argmax(target_qs, dim=-1)  # [B]
-        target_p_unproj = select_at_indexes(next_a, target_ps)  # [B,P']
-        target_p_unproj = target_p_unproj.unsqueeze(1)  # [B,1,P']
+        if state_value:
+            target_p_unproj = target_ps.unsqueeze(1)  # [B,1,P']
+        else:
+            target_p_unproj = select_at_indexes(next_a, target_ps)  # [B,P']
+            target_p_unproj = target_p_unproj.unsqueeze(1)  # [B,1,P']
         target_p = (target_p_unproj * projection_coeffs).sum(-1)
+
+    if len(rewards.shape) == 1:
+        target_p = target_p[0]
     return target_p

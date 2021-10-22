@@ -61,25 +61,17 @@ class SPRCategoricalDQN(CategoricalDQN):
         self.double_dqn=double
         self.breath = breath
         self.distributional = distributional
+        self.backup = backup
 
         if backup == "n-step-Q":
             if not distributional:
                 self.rl_loss = self.dqn_rl_loss
             else:
                 self.rl_loss = self.dist_rl_loss
-        elif backup == "graph":
+        elif backup in ["graph", "graph-mixed"]:
             self.rl_loss = self.gb_rl_loss
-        elif backup == "graph-mixed":
-            self.rl_loss = self.gb_mixed_rl_loss
         elif backup == "tree":
             self.rl_loss = self.tb_rl_loss
-
-        if distributional:
-            self.one_step_backup = partial(dist_backup, double_dqn=double, v_min=self.V_min, v_max=self.V_max,
-                                           n_atoms=self.agent.n_atoms, discount=self.discount)
-        else:
-            self.one_step_backup = partial(value_backup, double_dqn=double, discount=self.discount)
-
 
     def initialize_replay_buffer(self, examples, batch_spec, async_=False):
         example_to_buffer = ModelSamplesToBuffer(
@@ -125,6 +117,13 @@ class SPRCategoricalDQN(CategoricalDQN):
             self.optimizer.load_state_dict(self.initial_optim_state_dict)
         if self.prioritized_replay:
             self.pri_beta_itr = max(1, self.pri_beta_steps // self.sampler_bs)
+
+        if self.distributional:
+            self.one_step_backup = partial(dist_backup, double_dqn=self.double_dqn, v_min=self.V_min, v_max=self.V_max,
+                                           n_atoms=self.agent.n_atoms, discount=self.discount)
+        else:
+            self.one_step_backup = partial(value_backup, double_dqn=self.double_dqn, discount=self.discount)
+
 
     def samples_to_buffer(self, samples):
         """Defines how to add data from sampler into the replay buffer. Called
@@ -220,7 +219,10 @@ class SPRCategoricalDQN(CategoricalDQN):
             prev_actions = np.reshape(prev_actions, (shp[0]*shp[1]))
             target_qs = self.agent.target(states_flatten,
                                           prev_actions, prev_rewards)  # [N,B,A,P']
-            target_qs = np.reshape(target_qs, shp[:2]+(-1,))
+            if self.distributional:
+                target_qs = np.reshape(target_qs, shp[:2]+target_qs.shape[1:])
+            else:
+                target_qs = np.reshape(target_qs, shp[:2]+(-1,))
             target_qs_array = target_qs.cpu().numpy()
             if self.double_dqn:
                 q_idx = self.agent(states_flatten, prev_actions, prev_rewards)
@@ -232,7 +234,8 @@ class SPRCategoricalDQN(CategoricalDQN):
                 rewards = samples.all_reward[index+step]
                 dones = samples.all_done[index+step].float()
 
-                updated_target = self.one_step_backup(target_qs[index+step], q_idx, rewards, dones)
+                updated_target = self.one_step_backup(torch.tensor(target_qs_array[index+step]),
+                                                      q_idx, rewards, dones)
                 target_qs_array[step-1,range(shp[1]),action] = updated_target.cpu().numpy()
             #if np.any(samples.all_done.numpy()):
             #    print()
@@ -241,40 +244,73 @@ class SPRCategoricalDQN(CategoricalDQN):
             #y = samples.return_[index] + (1 - samples.done_n[index].float()) * disc_target_q
             y = target_qs[0][range(shp[1]),action]
 
-        delta = torch.tensor(y) - q.cpu()
-        losses = 0.5 * delta ** 2
-        abs_delta = abs(delta)
-        if self.delta_clip > 0:  # Huber loss.
-            b = self.delta_clip * (abs_delta - self.delta_clip / 2)
-            losses = torch.where(abs_delta <= self.delta_clip, losses, b)
-        td_abs_errors = abs_delta.detach()
-        if self.delta_clip > 0:
-            td_abs_errors = torch.clamp(td_abs_errors, 0, self.delta_clip)
-        return losses, td_abs_errors
+        if self.distributional:
+            p = select_at_indexes(samples.all_action[index + 1].squeeze(-1),
+                                  qs.cpu())  # [B,P]
+            # p = torch.clamp(p, EPS, 1)  # NaN-guard.
+            losses = -torch.sum(y * p, dim=1)  # Cross-entropy.
+
+            target_p = torch.clamp(y, EPS, 1)
+            KL_div = torch.sum(target_p *
+                               (torch.log(target_p) - p.detach()), dim=1)
+            abs_errors = torch.clamp(KL_div, EPS, 1 / EPS)
+        else:
+            delta = torch.tensor(y) - q.cpu()
+            losses = 0.5 * delta ** 2
+            abs_delta = abs(delta)
+            if self.delta_clip > 0:  # Huber loss.
+                b = self.delta_clip * (abs_delta - self.delta_clip / 2)
+                losses = torch.where(abs_delta <= self.delta_clip, losses, b)
+            abs_errors = abs_delta.detach()
+            if self.delta_clip > 0:
+                abs_errors = torch.clamp(abs_errors, 0, self.delta_clip)
+        return losses, abs_errors
 
     def gb_rl_loss(self, qs, samples, index):
         q = select_at_indexes(samples.all_action[index+1], qs)
         with torch.no_grad():
-            target_q = graph_limited_backup(self.agent, self.gb_collector.transition_freq,
-                                            samples.all_observation[index],
-                                            self.gb_collector.s2i, discount=self.discount,
-                                            breath=self.breath, depth=self.n_step_return,
-                                            double=self.double_dqn)
+            if self.backup == "graph-mixed":
+                y = graph_mixed_backup(self.agent, self.gb_collector.transition_freq,
+                                       samples.all_observation[index].to(qs.device),
+                                       samples.all_action[index + 1].cpu().numpy(),
+                                       self.gb_collector.s2i, double=self.double_dqn,
+                                       dist=self.distributional, discount=self.discount,
+                                       breath=self.breath, depth=self.n_step_return,
+                                       one_step_backup=self.one_step_backup)
+            elif self.backup == "graph":
+                target_q = graph_limited_backup(self.agent, self.gb_collector.transition_freq,
+                                                samples.all_observation[index].to(qs.device),
+                                                self.gb_collector.s2i, discount=self.discount,
+                                                breath=self.breath, depth=self.n_step_return,
+                                                dist=self.distributional,
+                                                double=self.double_dqn,
+                                                one_step_backup=self.one_step_backup)
 
-            #disc_target_q = (self.discount ** self.n_step_return) * target_q
-            #y = samples.return_[index] + (1 - samples.done_n[index].float()) * disc_target_q
-            y = select_at_indexes(samples.all_action[index+1], target_q)
+                #disc_target_q = (self.discount ** self.n_step_return) * target_q
+                #y = samples.return_[index] + (1 - samples.done_n[index].float()) * disc_target_q
+                y = select_at_indexes(samples.all_action[index+1], target_q)
 
-        delta = y - q.cpu()
-        losses = 0.5 * delta ** 2
-        abs_delta = abs(delta)
-        if self.delta_clip > 0:  # Huber loss.
-            b = self.delta_clip * (abs_delta - self.delta_clip / 2)
-            losses = torch.where(abs_delta <= self.delta_clip, losses, b)
-        td_abs_errors = abs_delta.detach()
-        if self.delta_clip > 0:
-            td_abs_errors = torch.clamp(td_abs_errors, 0, self.delta_clip)
-        return losses, td_abs_errors
+        if self.distributional:
+            p = select_at_indexes(samples.all_action[index + 1].squeeze(-1),
+                                  qs.cpu())  # [B,P]
+            # p = torch.clamp(p, EPS, 1)  # NaN-guard.
+            losses = -torch.sum(y * p, dim=1)  # Cross-entropy.
+
+            target_p = torch.clamp(y, EPS, 1)
+            KL_div = torch.sum(target_p *
+                               (torch.log(target_p) - p.detach()), dim=1)
+            abs_errors = torch.clamp(KL_div, EPS, 1 / EPS)
+        else:
+            delta = torch.tensor(y) - q.cpu()
+            losses = 0.5 * delta ** 2
+            abs_delta = abs(delta)
+            if self.delta_clip > 0:  # Huber loss.
+                b = self.delta_clip * (abs_delta - self.delta_clip / 2)
+                losses = torch.where(abs_delta <= self.delta_clip, losses, b)
+            abs_errors = abs_delta.detach()
+            if self.delta_clip > 0:
+                abs_errors = torch.clamp(abs_errors, 0, self.delta_clip)
+        return losses, abs_errors
 
     def dqn_rl_loss(self, qs, samples, index):
         """

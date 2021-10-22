@@ -23,7 +23,7 @@ class SPRAgent(AtariCatDqnAgent):
                 device=self.device)
             return self.model(*model_inputs, train=train)
         else:
-            if prev_reward:
+            if prev_reward is not None:
                 prev_action = self.distribution.to_onehot(prev_action)
                 model_inputs = buffer_to((observation, prev_action, prev_reward),
                     device=self.device)
