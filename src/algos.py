@@ -225,7 +225,12 @@ class SPRCategoricalDQN(CategoricalDQN):
                 target_qs = np.reshape(target_qs, shp[:2]+(-1,))
             target_qs_array = target_qs.cpu().numpy()
             if self.double_dqn:
-                q_idx = self.agent(states_flatten, prev_actions, prev_rewards)
+                q_online = self.agent(states_flatten, prev_actions, prev_rewards)
+                if self.distributional:
+                    z = torch.linspace(self.agent.V_min, self.agent.V_max, self.agent.n_atoms)
+                    q_online = torch.tensordot(q_online, z, dims=1)
+                q_online = torch.reshape(q_online, shp[:2] + q_online.shape[1:])
+                q_idx = torch.argmax(q_online, dim=-1)
             else:
                 q_idx = None
 
@@ -235,7 +240,7 @@ class SPRCategoricalDQN(CategoricalDQN):
                 dones = samples.all_done[index+step].float()
 
                 updated_target = self.one_step_backup(torch.tensor(target_qs_array[index+step]),
-                                                      q_idx, rewards, dones)
+                                                      q_idx[index+step], rewards, dones)
                 target_qs_array[step-1,range(shp[1]),action] = updated_target.cpu().numpy()
             #if np.any(samples.all_done.numpy()):
             #    print()
