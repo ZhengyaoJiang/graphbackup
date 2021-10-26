@@ -1,7 +1,7 @@
 from rlpyt.samplers.base import BaseSampler
 from rlpyt.samplers.buffer import build_samples_buffer
 from rlpyt.samplers.parallel.cpu.collectors import CpuResetCollector
-from rlpyt.samplers.serial.collectors import SerialEvalCollector
+from src.rlpyt.rlpyt.samplers.serial.collectors import SerialEvalCollector
 from rlpyt.utils.buffer import buffer_from_example, torchify_buffer, numpify_buffer
 from rlpyt.utils.logging import logger
 from rlpyt.utils.quick_args import save__init__args
