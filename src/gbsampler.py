@@ -7,6 +7,7 @@ from rlpyt.samplers.collectors import (DecorrelatingStartCollector,
 from rlpyt.agents.base import AgentInputs
 from rlpyt.utils.buffer import (torchify_buffer, numpify_buffer, buffer_from_example,
     buffer_method)
+from typing import Optional, Dict, Tuple, List
 
 def hashing(image, method):
     if method == "exact":
@@ -224,7 +225,7 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, doub
                 overall_count += count
                 if next_state not in i2q_temp:
                     i2q_temp[next_state] = torch.clone(i2q[next_state])
-                idx = i2max[next_state] if double else None
+                idx = i2max[next_state] if double else torch.zeros(0)
                 v += count * one_step_backup(i2q_temp[next_state], idx, torch.tensor(r), torch.tensor(d))
             i2q_temp[state][action] = v / overall_count
         targets.append(i2q_temp[source_idx])
@@ -233,8 +234,8 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, doub
 
 def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath,
                        depth, double, dist, one_step_backup):
-    targets = []
     source_idxes = s2i.get_indexes(states)
+    targets = []
     sa_all = []
     target_states = []
 
@@ -281,32 +282,43 @@ def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath,
     else:
         i2max = None
 
+    actions = [a for a in actions]
+    result = mixed_backup_with_graph(sa_all, freq.freq, i2q, i2max, actions, double, discount)
+    return result
 
+
+def mixed_backup_with_graph(sa_all:List[Tuple[int, List[Tuple[int]]]],
+                            freq_count:Dict[int, Dict[int, Dict[Tuple[float, bool, int], int]]],
+                            i2q:Dict[int, torch.Tensor], i2max:Dict[int, torch.Tensor], actions:List[int],
+                            double_dqn:bool, discount:float):
+    targets = []
     for n,(source_idx, sa) in enumerate(sa_all):
         i2v = {}
         for state, action in reversed(sa):
             v = 0
             overall_count = 0
-            for r, d, next_state in freq.freq[state][action]:  # loop through different possibilities
-                count = freq.freq[state][action][(r, d, next_state)]
+            for r, d, next_state in freq_count[state][action]:  # loop through different possibilities
+                count = freq_count[state][action][(r, d, next_state)]
                 overall_count += count
 
                 if next_state in i2v:
                     next_value = i2v[next_state]
-                    v += count * one_step_backup(next_value, None, torch.tensor(r), torch.tensor(d),
-                                                 state_value=True)
+                    v += count * value_backup(next_value, torch.zeros(0), torch.tensor(r), torch.tensor(d),
+                                              double_dqn=double_dqn, discount=discount,
+                                              state_value=True)
                 else:
                     next_value = i2q[next_state]
-                    idx = i2max[next_state] if double else None
-                    v += count * one_step_backup(next_value, idx, torch.tensor(r), torch.tensor(d),
-                                                 state_value=False)
+                    idx = i2max[next_state] if double_dqn else torch.zeros(0)
+                    v += count * value_backup(next_value, idx, torch.tensor(r), torch.tensor(d),
+                                              double_dqn=double_dqn, discount=discount,
+                                              state_value=False)
 
             i2v[state] = v / overall_count
         source_action = actions[n]
         target = 0
         overall_count = 0
-        for r, d, next_state in freq.freq[source_idx][source_action]:  # loop through different possibilities
-            count = freq.freq[source_idx][source_action][(r, d, next_state)]
+        for r, d, next_state in freq_count[source_idx][source_action]:  # loop through different possibilities
+            count = freq_count[source_idx][source_action][(r, d, next_state)]
             overall_count += count
             if not d and next_state not in i2v:
                 overall_count -= count
@@ -315,15 +327,17 @@ def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath,
                     next_value = torch.zeros_like(i2v[source_idx])
                 else:
                     next_value = i2v[next_state]
-                target += count * one_step_backup(next_value, None, torch.tensor(r), torch.tensor(d),
-                                                  state_value=True)
+                target += count * value_backup(next_value, torch.zeros(0), torch.tensor(r), torch.tensor(d),
+                                               double_dqn=double_dqn, discount=discount,
+                                               state_value=True)
 
         targets.append(target/overall_count)
     return torch.stack(targets)
 
 
-
-def value_backup(target_q, q_idx, rewards, dones, double_dqn, discount, state_value=False):
+@torch.jit.script
+def value_backup(target_q, q_idx, rewards, dones,
+                 double_dqn:bool, discount:float, state_value:bool=False):
     if state_value:
         return rewards + (1-dones.float())*discount*target_q
 
@@ -333,7 +347,9 @@ def value_backup(target_q, q_idx, rewards, dones, double_dqn, discount, state_va
         return rewards + (1-dones.float())*discount*torch.max(target_q, dim=-1)[0]
 
 
-def dist_backup(target_ps, q_idx, rewards, dones, double_dqn, v_min, v_max, n_atoms, discount, state_value=False):
+@torch.jit.script
+def dist_backup(target_ps, q_idx, rewards, dones,
+                double_dqn:bool, v_min:float, v_max:float, n_atoms:int, discount:float, state_value:bool=False):
     if len(rewards.shape) == 0:
         target_ps = target_ps.unsqueeze(0)
         rewards = rewards.unsqueeze(0)

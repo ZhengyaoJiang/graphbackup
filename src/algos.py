@@ -232,7 +232,7 @@ class SPRCategoricalDQN(CategoricalDQN):
                 q_online = torch.reshape(q_online, shp[:2] + q_online.shape[1:])
                 q_idx = torch.argmax(q_online, dim=-1)
             else:
-                q_idx = None
+                q_idx = torch.zeros(shp[0])
 
             for step in reversed(range(1, self.n_step_return+1)):
                 action = samples.all_action[index+step]
