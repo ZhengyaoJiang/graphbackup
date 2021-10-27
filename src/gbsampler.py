@@ -284,23 +284,22 @@ def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath,
 
     for n,(source_idx, sa) in enumerate(sa_all):
         i2v = {}
-        for state, _ in reversed(sa):
+        for state, action in reversed(sa):
             v = 0
             overall_count = 0
-            for action in freq.freq[state]:
-                for r, d, next_state in freq.freq[state][action]:  # loop through different possibilities
-                    count = freq.freq[state][action][(r, d, next_state)]
-                    overall_count += count
+            for r, d, next_state in freq.freq[state][action]:  # loop through different possibilities
+                count = freq.freq[state][action][(r, d, next_state)]
+                overall_count += count
 
-                    if next_state in i2v:
-                        next_value = i2v[next_state]
-                        v += count * one_step_backup(next_value, None, torch.tensor(r), torch.tensor(d),
-                                                     state_value=True)
-                    else:
-                        next_value = i2q[next_state]
-                        idx = i2max[next_state] if double else None
-                        v += count * one_step_backup(next_value, idx, torch.tensor(r), torch.tensor(d),
-                                                     state_value=False)
+                if next_state in i2v:
+                    next_value = i2v[next_state]
+                    v += count * one_step_backup(next_value, None, torch.tensor(r), torch.tensor(d),
+                                                 state_value=True)
+                else:
+                    next_value = i2q[next_state]
+                    idx = i2max[next_state] if double else None
+                    v += count * one_step_backup(next_value, idx, torch.tensor(r), torch.tensor(d),
+                                                 state_value=False)
 
             i2v[state] = v / overall_count
         source_action = actions[n]
