@@ -261,6 +261,8 @@ class OneToOneSerialEvalCollector(SerialEvalCollector):
             while b < len(live_envs):  # don't want to do a for loop since live envs changes over time
                 env_id = live_envs[b]
                 o, r, d, env_info = self.envs[env_id].step(action[b])
+                if env_id == 0:
+                    self.envs[env_id].render()
                 traj_infos[env_id].step(observation[b],
                                         action[b], r, d,
                                         agent_info[b], env_info)
