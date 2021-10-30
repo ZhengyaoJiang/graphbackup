@@ -153,11 +153,10 @@ class AtariEnv(Env):
             self._reset_obs()  # Internal reset.
         self._update_obs(action)
         reward = np.sign(game_score) if self._clip_reward else game_score
-        game_over = self.ale.game_over() or self._step_counter >= self.horizon or self.ale.lives() == 0
-        if (not self.ale.game_over()) and self.ale.lives() == 0:
-            print("error")
         if self.game in ["freeway"]: # dealing with single life games
             game_over = self.ale.game_over() or self._step_counter >= self.horizon
+        else:
+            game_over = self.ale.game_over() or self._step_counter >= self.horizon or self.ale.lives() == 0
         done = game_over or (self._episodic_lives and lost_life)
         info = EnvInfo(game_score=game_score, traj_done=game_over)
         self._step_counter += 1
