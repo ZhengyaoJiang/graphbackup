@@ -354,8 +354,11 @@ def dist_backup(target_ps, q_idx, rewards, dones,
         target_ps = target_ps.unsqueeze(0)
         rewards = rewards.unsqueeze(0)
         dones = dones.unsqueeze(0)
+        reshaped = True
         if double_dqn and not state_value:
             q_idx = q_idx.unsqueeze(0)
+    else:
+        reshaped = False
 
     delta_z = (v_max - v_min) / (n_atoms - 1)
     z = torch.linspace(v_min, v_max, n_atoms)
@@ -382,6 +385,6 @@ def dist_backup(target_ps, q_idx, rewards, dones,
             target_p_unproj = target_p_unproj.unsqueeze(1)  # [B,1,P']
         target_p = (target_p_unproj * projection_coeffs).sum(-1)
 
-    if len(rewards.shape) == 1:
+    if reshaped:
         target_p = target_p[0]
     return target_p
