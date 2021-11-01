@@ -22,6 +22,7 @@ from src.agent import SPRAgent
 from src.rlpyt_atari_env import AtariEnv
 from src.utils import set_config
 
+torch.set_num_threads(4)
 
 def build_and_train(game="pong", run_ID=0, args=None):
     np.random.seed(args.seed)
