@@ -232,52 +232,6 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, doub
         targets.append(i2q_temp[source_idx])
     return torch.stack(targets)
 
-@numba.jit(nopython=False, parallel=True)
-def mixed_backup_with_graph(sa_all:List[Tuple[Union[int, List[Tuple[int]]]]],
-                            freq_count:Dict[int, Dict[int, List[Tuple[Union[float, bool, int, int]]]]],
-                            i2q:Dict[int, torch.Tensor], i2max:Dict[int, torch.Tensor], actions:List[int],
-                            double_dqn:bool, discount:float):
-    targets = []
-    for n,(source_idx, sa) in enumerate(sa_all):
-        sa.reverse()
-        i2v = {}
-        for state, action in sa:
-            v = 0
-            overall_count = 0
-            for r, d, next_state, count in freq_count[state][action]:  # loop through different possibilities
-                overall_count += count
-
-                if next_state in i2v:
-                    next_value = i2v[next_state]
-                    v += count * value_backup(next_value, torch.zeros(0), torch.tensor(r), torch.tensor(d),
-                                              double_dqn=double_dqn, discount=discount,
-                                              state_value=True)
-                else:
-                    next_value = i2q[next_state]
-                    idx = i2max[next_state] if double_dqn else torch.zeros(0)
-                    v += count * value_backup(next_value, idx, torch.tensor(r), torch.tensor(d),
-                                              double_dqn=double_dqn, discount=discount,
-                                              state_value=False)
-
-            i2v[state] = v / overall_count
-        source_action = actions[n]
-        target = 0
-        overall_count = 0
-        for r, d, next_state, count in freq_count[source_idx][source_action]:  # loop through different possibilities
-            overall_count += count
-            if not d and next_state not in i2v:
-                overall_count -= count
-            else:
-                if d:
-                    next_value = torch.zeros_like(i2v[source_idx])
-                else:
-                    next_value = i2v[next_state]
-                target += count * value_backup(next_value, torch.zeros(0), torch.tensor(r), torch.tensor(d),
-                                               double_dqn=double_dqn, discount=discount,
-                                               state_value=True)
-
-        targets.append(target/overall_count)
-    return torch.stack(targets)
 
 
 def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath,
@@ -332,7 +286,9 @@ def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath,
 
     actions = [int(a) for a in actions]
 
-    result = mixed_backup_with_graph(sa_all, format_freq_dict(freq.freq), i2q, i2max, actions, double, discount)
+    freq_map, rewards, dones, next_states, counts = format_freq_dict(freq.freq)
+    result = mixed_backup_with_graph(sa_all, freq_map, rewards, dones, next_states, counts,
+                                     i2q, i2max, actions, double, dist, discount)
     return result
 
 
@@ -342,16 +298,24 @@ def format_freq_dict(freq_dict):
     :param freq_dict:
     :return:
     """
-    result = {}
+    freq_count_map = {}
+    rewards = []
+    dones = []
+    next_states = []
+    counts = []
     for state, subdict in freq_dict.items():
-        if state not in result:
-            result[state] = {}
+        if state not in freq_count_map:
+            freq_count_map[state] = {}
         for action, subsubdict in subdict.items():
-            if action not in result[state]:
-                result[state][action] = []
+            if action not in freq_count_map[state]:
+                freq_count_map[state][action] = []
             for (r, d, s1), count in subsubdict.items():
-                result[state][action].append((r, d, s1, count))
-    return result
+                freq_count_map[state][action].append(len(rewards))
+                rewards.append(r)
+                dones.append(d)
+                next_states.append(s1)
+                counts.append(count)
+    return freq_count_map, rewards, dones, next_states, counts
 
 
 @torch.jit.script
@@ -368,7 +332,8 @@ def value_backup(target_q, q_idx, rewards, dones,
 
 @torch.jit.script
 def dist_backup(target_ps, q_idx, rewards, dones,
-                double_dqn:bool, v_min:float, v_max:float, n_atoms:int, discount:float, state_value:bool=False):
+                double_dqn:bool, discount:float, state_value:bool=False,
+                v_min:float=-10.0, v_max:float=10.0, n_atoms:int=51):
     if len(rewards.shape) == 0:
         target_ps = target_ps.unsqueeze(0)
         rewards = rewards.unsqueeze(0)
@@ -407,3 +372,68 @@ def dist_backup(target_ps, q_idx, rewards, dones,
     if reshaped:
         target_p = target_p[0]
     return target_p
+
+def backup(distributional_rl:bool,target_ps, q_idx, rewards, dones,
+                double_dqn:bool, discount:float, state_value:bool=False,
+                v_min:float=-10.0, v_max:float=10.0, n_atoms:int=51):
+    if distributional_rl:
+        return dist_backup(target_ps, q_idx, rewards, dones, double_dqn, discount, state_value,
+                           v_min, v_max, n_atoms)
+    else:
+        return value_backup(target_ps, q_idx, rewards, dones, double_dqn, discount, state_value)
+
+
+def mixed_backup_with_graph(sa_all:List[Tuple[int, List[Tuple[int, int]]]],
+                            freq_count_map:Dict[int, Dict[int, List[int]]],
+                            rewards:List[float], dones:List[bool], next_states:List[int], counts:List[int],
+                            i2q:Dict[int, torch.Tensor], i2max:Dict[int, torch.Tensor], actions:List[int],
+                            double_dqn:bool, distributional_rl:bool, discount:float,
+                            v_min: float=-10.0,
+                            v_max: float=10.0,
+                            n_atoms: int=51):
+    targets = []
+    for n, i_and_sa in enumerate(sa_all):
+        source_idx: int = i_and_sa[0]
+        sa: List[Tuple[int, int]] = i_and_sa[1]
+        i2v: Dict[int, torch.Tensor] = {}
+        for state_and_action in sa:
+            state: int = state_and_action[0]
+            action: int = state_and_action[1]
+            v = 0
+            overall_count = 0
+            for freq_idx in freq_count_map[state][action]:  # loop through different possibilities
+                r, d, next_state, count = rewards[freq_idx], dones[freq_idx], next_states[freq_idx], counts[freq_idx]
+                overall_count += count
+
+                if next_state in i2v:
+                    next_value = i2v[next_state]
+                    v += count * backup(distributional_rl, next_value, torch.zeros(0), torch.tensor(r), torch.tensor(d),
+                                              double_dqn=double_dqn, discount=discount,
+                                              state_value=True, v_min=v_min, v_max=v_max, n_atoms=n_atoms)
+                else:
+                    next_value = i2q[next_state]
+                    idx = i2max[next_state] if double_dqn else torch.zeros(0)
+                    v += count * backup(distributional_rl, next_value, idx, torch.tensor(r), torch.tensor(d),
+                                              double_dqn=double_dqn, discount=discount,
+                                              state_value=False)
+
+            i2v[state] = torch.tensor(v / overall_count)
+        source_action = actions[n]
+        target = 0
+        overall_count = 0
+        for freq_idx in freq_count_map[source_idx][source_action]:  # loop through different possibilities
+            r, d, next_state, count = rewards[freq_idx], dones[freq_idx], next_states[freq_idx], counts[freq_idx]
+            overall_count += count
+            if not d and next_state not in i2v:
+                overall_count -= count
+            else:
+                if d:
+                    next_value = torch.zeros_like(i2v[source_idx])
+                else:
+                    next_value = i2v[next_state]
+                target += count * backup(distributional_rl, next_value, torch.zeros(0), torch.tensor(r), torch.tensor(d),
+                                               double_dqn=double_dqn, discount=discount,
+                                               state_value=True)
+
+        targets.append(target/torch.tensor(overall_count))
+    return torch.stack(targets)
