@@ -9,7 +9,7 @@ from scipy.stats import wilcoxon
 
 parser = argparse.ArgumentParser(description="Analyse the logs produced by torchbeast")
 
-parser.add_argument("--dir", type=str, default="~/logs/ava", help="Directory for log files.")
+parser.add_argument("--dir", type=str, default="~/locallogs/ava", help="Directory for log files.")
 parser.add_argument("--mode", type=str, default="table", choices=["table", "plot", "joint_plot",
                                                                   "group_plot", "integrate_table", "integrate_plot"])
 parser.add_argument("--idx", "--index", nargs="+", required=True)
