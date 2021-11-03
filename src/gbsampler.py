@@ -1,6 +1,5 @@
 import numpy as np
 import torch
-import numba
 from random import choices
 from rlpyt.utils.tensor import select_at_indexes, valid_mean
 from rlpyt.samplers.collectors import (DecorrelatingStartCollector,
@@ -381,7 +380,6 @@ def backup(distributional_rl:bool,target_ps, q_idx, rewards, dones,
                            v_min, v_max, n_atoms)
     else:
         return value_backup(target_ps, q_idx, rewards, dones, double_dqn, discount, state_value)
-
 
 def mixed_backup_with_graph(sa_all:List[Tuple[int, List[Tuple[int, int]]]],
                             freq_count_map:Dict[int, Dict[int, List[int]]],
