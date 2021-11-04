@@ -139,6 +139,10 @@ class AtariEnv(Env):
                     self.reset()
         self._update_obs(0)  # (don't bother to populate any frame history)
         self._step_counter = 0
+        if self.ale.lives() == 0:
+            self._start_with_0 = True
+        else:
+            self._start_with_0 = False
         return self.get_obs()
 
     def step(self, action):
@@ -153,7 +157,7 @@ class AtariEnv(Env):
             self._reset_obs()  # Internal reset.
         self._update_obs(action)
         reward = np.sign(game_score) if self._clip_reward else game_score
-        if self.game in ["freeway", "boxing", "private_eye"]: # dealing with single life games
+        if self._start_with_0: # dealing with single life games
             game_over = self.ale.game_over() or self._step_counter >= self.horizon
         else:
             game_over = self.ale.game_over() or self._step_counter >= self.horizon or self.ale.lives() == 0
