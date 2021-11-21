@@ -27,12 +27,17 @@ torch.set_num_threads(4)
 def build_and_train(game="pong", run_ID=0, args=None):
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
+    if args.architecture == "efficient-zero":
+        args.imagesize=96
+        args.framestack=4
+
     env = AtariEnv
     config = set_config(args, game)
     if torch.cuda.is_available() and not args.disable_cuda:
         affinity = dict(cuda_idx=torch.cuda.current_device())
     else:
         affinity = dict()
+
 
     sampler = SerialSampler(
         EnvCls=env,
@@ -139,6 +144,7 @@ if __name__ == "__main__":
     parser.add_argument('--public', action='store_true', help='If set, uses anonymous wandb logging')
     parser.add_argument('--disable_cuda', action='store_true')
     parser.add_argument('--backup', type=str, default='n-step-Q', choices=["n-step-Q", "graph", "graph-mixed", "tree"])
+    parser.add_argument('--architecture', type=str, default='spr', choices=["spr", "efficient-zero"])
     args = parser.parse_args()
 
     build_and_train(game=args.game,

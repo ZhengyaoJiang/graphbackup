@@ -49,6 +49,7 @@ def set_config(args, game):
     config['agent']['eps_init'] = args.eps_init
     config['agent']['eps_final'] = args.eps_final
     config["model"]["noisy_nets_std"] = args.noisy_nets_std
+    config["model"]["architecture"] = args.architecture
 
     if args.noisy_nets:
         config['agent']['eps_eval'] = 0.001
