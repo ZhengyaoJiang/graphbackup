@@ -30,7 +30,7 @@ def set_config(args, game):
     config["algo"]["min_steps_learn"] = args.min_steps_learn
     config["algo"]["n_step_return"] = args.n_step
     config["algo"]["batch_size"] = args.batch_size
-    config["algo"]["learning_rate"] = 0.0001
+    config["algo"]["learning_rate"] = args.learning_rate
     config['algo']['replay_ratio'] = args.replay_ratio
     config['algo']['target_update_interval'] = args.target_update_interval
     config['algo']['target_update_tau'] = args.target_update_tau

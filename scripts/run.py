@@ -131,6 +131,7 @@ if __name__ == "__main__":
     parser.add_argument('--min-steps-learn', type=int, default=2000)
     parser.add_argument('--eps-init', type=float, default=1.)
     parser.add_argument('--eps-final', type=float, default=0.)
+    parser.add_argument('--learning_rate', type=float, default=0.0001)
     parser.add_argument('--final-eval-only', type=int, default=0)
     parser.add_argument('--time-offset', type=int, default=0)
     parser.add_argument('--project', type=str, default="mpr")
