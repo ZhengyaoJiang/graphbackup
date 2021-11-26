@@ -4,6 +4,7 @@ import torch.nn as nn
 
 from rlpyt.models.utils import scale_grad, update_state_dict
 from rlpyt.utils.tensor import infer_leading_dims, restore_leading_dims
+from src.resnet import ResNetRepresentation
 from src.utils import count_parameters, dummy_context_mgr
 import numpy as np
 from kornia.augmentation import RandomAffine,\
@@ -51,6 +52,7 @@ class SPRCatDqnModel(torch.nn.Module):
             model_rl,
             noisy_nets_std,
             residual_tm,
+            architecture="spr",
             use_maxpool=False,
             channels=None,  # None uses default.
             kernel_sizes=None,
@@ -110,15 +112,19 @@ class SPRCatDqnModel(torch.nn.Module):
         self.dueling = dueling
         f, c = image_shape[:2]
         in_channels = np.prod(image_shape[:2])
-        self.conv = Conv2dModel(
-            in_channels=in_channels,
-            channels=[32, 64, 64],
-            kernel_sizes=[8, 4, 3],
-            strides=[4, 2, 1],
-            paddings=[0, 0, 0],
-            use_maxpool=False,
-            dropout=dropout,
-        )
+
+        if architecture == "spr":
+            self.conv = Conv2dModel(
+                in_channels=in_channels,
+                channels=[32, 64, 64],
+                kernel_sizes=[8, 4, 3],
+                strides=[4, 2, 1],
+                paddings=[0, 0, 0],
+                use_maxpool=False,
+                dropout=dropout,
+            )
+        elif architecture == "efficient-zero":
+            self.conv = ResNetRepresentation(in_channels)
 
         fake_input = torch.zeros(1, f*c, imagesize, imagesize)
         fake_output = self.conv(fake_input)
@@ -981,3 +987,5 @@ def renormalize(tensor, first_dim=1):
     flat_tensor = (flat_tensor - min)/(max - min)
 
     return flat_tensor.view(*tensor.shape)
+
+
