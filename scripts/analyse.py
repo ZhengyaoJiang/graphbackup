@@ -11,7 +11,8 @@ parser = argparse.ArgumentParser(description="Analyse the logs produced by torch
 
 parser.add_argument("--dir", type=str, default="~/locallogs/ava", help="Directory for log files.")
 parser.add_argument("--mode", type=str, default="table", choices=["table", "plot", "joint_plot",
-                                                                  "group_plot", "integrate_table", "integrate_plot"])
+                                                                  "group_plot", "integrate_table", "integrate_plot",
+                                                                  "states_portion"])
 parser.add_argument("--idx", "--index", nargs="+", required=True)
 parser.add_argument("--repeats", default=3, type=int)
 parser.add_argument("--steps", default=float('inf'), type=float)
