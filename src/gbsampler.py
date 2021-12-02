@@ -1,5 +1,9 @@
 import numpy as np
 import torch
+import networkx as nx
+import json
+import matplotlib.pyplot as plt
+import matplotlib as pylab
 from random import choices
 from rlpyt.utils.tensor import select_at_indexes, valid_mean
 from rlpyt.samplers.collectors import (DecorrelatingStartCollector,
@@ -8,6 +12,7 @@ from rlpyt.agents.base import AgentInputs
 from rlpyt.utils.buffer import (torchify_buffer, numpify_buffer, buffer_from_example,
     buffer_method)
 from typing import Optional, Dict, Tuple, List, Union
+
 
 def hashing(image, method):
     if method == "exact":
@@ -70,6 +75,18 @@ class TransitionFreq():
         if (r, d, s1) not in self.freq[s][a]:
             self.freq[s][a][(r, d, s1)] = 0
         self.freq[s][a][(r, d, s1)] += 1
+
+    def save_graph(self, path="."):
+        edges = []
+        for s, subdict in self.freq.items():
+            for a, subsubdict in subdict.items():
+                for r, d, s1 in subsubdict.keys():
+                    edges.append((s,s1))
+        with open(path+'/edges.json', 'w') as f:
+            json.dump(edges, f)
+
+        #graph = nx.Graph(edges)
+        #plt.savefig(path+"/graphvis.png", bbox_inches="tight")
 
 
 class CpuResetGraphCollector(DecorrelatingStartCollector):

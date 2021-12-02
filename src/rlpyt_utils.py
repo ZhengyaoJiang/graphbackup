@@ -187,6 +187,8 @@ class MinibatchRlEvalWandb(MinibatchRlEval):
             self.agent.eval_mode(itr)  # Might be agent in sampler.
             eval_time = -time.time()
             traj_infos = self.sampler.evaluate_agent(itr)
+            if itr > 0:
+                self.algo.gb_collector.transition_freq.save_graph(self.log_path)
             eval_time += time.time()
         else:
             traj_infos = []
