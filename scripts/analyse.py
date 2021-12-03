@@ -6,13 +6,15 @@ import os
 import argparse
 from pathlib import Path
 from scipy.stats import wilcoxon
+import json
+import networkx as nx
 
 parser = argparse.ArgumentParser(description="Analyse the logs produced by torchbeast")
 
 parser.add_argument("--dir", type=str, default="~/locallogs/ava", help="Directory for log files.")
 parser.add_argument("--mode", type=str, default="table", choices=["table", "plot", "joint_plot",
                                                                   "group_plot", "integrate_table", "integrate_plot",
-                                                                  "states_portion"])
+                                                                  "states_portion", "plot_graph"])
 parser.add_argument("--idx", "--index", nargs="+", required=True)
 parser.add_argument("--repeats", default=3, type=int)
 parser.add_argument("--steps", default=float('inf'), type=float)
@@ -239,6 +241,30 @@ def parse_state_portions(tasks, indexes,
     df.loc["median"] = median
     print(df)
 
+def plot_graph(task, index, dir, label="", name="graph"):
+    os.path.join(dir, index, "edges.json")
+    with open('edges.json') as json_file:
+        edges = json.load(json_file)
+
+    graph = nx.DiGraph(edges)
+    roots = list(node for node in graph.nodes() if graph.in_degree(node) == 0)
+
+    for start in roots:
+        graph.add_edge(-1, start)
+
+    pos = nx.nx_agraph.graphviz_layout(graph, prog="twopi", root=-1)
+    plt.figure(figsize=(8, 8))
+    options = {"with_labels": False, "alpha": 0.5, "node_size": 0, "arrows": False}
+
+    nx.draw(graph, pos, **options)
+    plt.title(task+label)
+
+    name = os.path.expanduser(os.path.join(dir, name))
+    Path(os.path.dirname(name)).mkdir(parents=True, exist_ok=True)
+    plt.savefig(name)
+
+
+
 def main(flags):
     if flags.mode == "table":
         print_stats_dict(compute_return_stats(flags.idx, flags.dir))
@@ -259,8 +285,8 @@ def main(flags):
         parse_state_portions(flags.tasks, flags.idx, flags.labels, flags.dir, flags.steps, flags.name,
                              repeats=flags.repeats, human_scores=flags.human_scores, random_scores=flags.random_scores,
                              summary=flags.summary)
-
-
+    if flags.mode == "plot_graph":
+        plot_graph(flags.tasks[0], flags.idx[0], flags.dir, name=flags.name)
 
 
 
