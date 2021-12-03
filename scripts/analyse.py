@@ -242,8 +242,8 @@ def parse_state_portions(tasks, indexes,
     print(df)
 
 def plot_graph(task, index, dir, label="", name="graph"):
-    os.path.join(dir, index, "edges.json")
-    with open('edges.json') as json_file:
+    path = os.path.join(dir, index, "edges.json")
+    with open(path) as json_file:
         edges = json.load(json_file)
 
     graph = nx.DiGraph(edges)
