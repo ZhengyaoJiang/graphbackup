@@ -202,7 +202,7 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, doub
             for s in new_s:
                 if s in freq.freq:
                     for action in freq.freq[s].keys():
-                        for r, d, next_state in freq.freq[s][action]:  # loop though different possibilities
+                        for r, d, next_state in freq.freq[s][action]:  # loop through different possibilities
                             new_trans.add((s, action, r, d, next_state))
             target_states.extend([t[-1] for t in new_trans])
             if len(new_trans) > breath:
@@ -232,7 +232,7 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, doub
 
     for source_idx, sa, in sa_all:
         i2q_temp = {}
-        for state, action in sa:
+        for state, action in reversed(sa):
             if state not in i2q_temp:
                 i2q_temp[state] = torch.clone(i2q[state])
             v = 0
@@ -411,7 +411,7 @@ def mixed_backup_with_graph(sa_all:List[Tuple[int, List[Tuple[int, int]]]],
         source_idx: int = i_and_sa[0]
         sa: List[Tuple[int, int]] = i_and_sa[1]
         i2v: Dict[int, torch.Tensor] = {}
-        for state_and_action in sa:
+        for state_and_action in reversed(sa):
             state: int = state_and_action[0]
             action: int = state_and_action[1]
             v = 0
