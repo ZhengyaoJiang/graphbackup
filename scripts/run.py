@@ -58,6 +58,7 @@ def build_and_train(game="pong", run_ID=0, args=None):
     agent = SPRAgent(ModelCls=SPRCatDqnModel, model_kwargs=config["model"], **config["agent"])
 
     runner = MinibatchRlEvalWandb(
+        store_graph=args.store_graph,
         exp_id=args.exp_id,
         algo=algo,
         agent=agent,
@@ -94,6 +95,7 @@ if __name__ == "__main__":
     parser.add_argument('--batch-b', type=int, default=1)
     parser.add_argument('--batch-t', type=int, default=1)
     parser.add_argument('--beluga', action="store_true")
+    parser.add_argument('--store_graph', action="store_true")
     parser.add_argument('--jumps', type=int, default=5)
     parser.add_argument('--num-logs', type=int, default=100)
     parser.add_argument('--renormalize', type=int, default=1)

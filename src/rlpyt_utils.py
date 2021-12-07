@@ -65,9 +65,10 @@ atari_random_scores = dict(
 
 class MinibatchRlEvalWandb(MinibatchRlEval):
 
-    def __init__(self, final_eval_only=False, exp_id="test", *args, **kwargs):
+    def __init__(self, final_eval_only=False, exp_id="test", store_graph=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.final_eval_only = final_eval_only
+        self.store_graph = store_graph
         self.record = dict(step=[], mean_episode_return=[], number_of_states=[])
         self.log_path = os.path.expandvars(os.path.expanduser(os.path.join('~/locallogs/ava', exp_id)))
         if not os.path.exists(self.log_path):
@@ -187,7 +188,7 @@ class MinibatchRlEvalWandb(MinibatchRlEval):
             self.agent.eval_mode(itr)  # Might be agent in sampler.
             eval_time = -time.time()
             traj_infos = self.sampler.evaluate_agent(itr)
-            if itr > 0:
+            if itr > 0 and self.store_graph:
                 self.algo.gb_collector.transition_freq.save_graph(self.log_path)
             eval_time += time.time()
         else:
