@@ -52,7 +52,7 @@ class SPRCatDqnModel(torch.nn.Module):
             model_rl,
             noisy_nets_std,
             residual_tm,
-            architecture="spr",
+            architecture,
             use_maxpool=False,
             channels=None,  # None uses default.
             kernel_sizes=None,
@@ -125,6 +125,16 @@ class SPRCatDqnModel(torch.nn.Module):
             )
         elif architecture == "efficient-zero":
             self.conv = ResNetRepresentation(in_channels)
+        elif architecture == "gridworld":
+            self.conv = Conv2dModel(
+                in_channels=in_channels,
+                channels=[12, 12],
+                kernel_sizes=[3, 3],
+                strides=[1, 1],
+                paddings=[0, 0],
+                use_maxpool=False,
+                dropout=dropout,
+            )
 
         fake_input = torch.zeros(1, f*c, imagesize, imagesize)
         fake_output = self.conv(fake_input)

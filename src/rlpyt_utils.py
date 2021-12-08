@@ -153,8 +153,8 @@ class MinibatchRlEvalWandb(MinibatchRlEval):
                     self.wandb_info[k + "Min"] = np.min(values)
                     self.wandb_info[k + "Max"] = np.max(values)
                     self.wandb_info[k + "Median"] = np.median(values)
-                    if k == 'GameScore':
-                        game = self.sampler.env_kwargs['game']
+                    game = self.sampler.env_kwargs['game']
+                    if k == 'GameScore' and game in atari_random_scores:
                         random_score = atari_random_scores[game]
                         der_score = atari_der_scores[game]
                         nature_score = atari_nature_scores[game]

@@ -20,7 +20,10 @@ from src.rlpyt_utils import OneToOneSerialEvalCollector, SerialSampler, Minibatc
 from src.algos import SPRCategoricalDQN
 from src.agent import SPRAgent
 from src.rlpyt_atari_env import AtariEnv
+from src.rlpyt_gridworld_env import MinAtarEnv, MiniGridEnv
 from src.utils import set_config
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 torch.set_num_threads(4)
 
@@ -31,19 +34,41 @@ def build_and_train(game="pong", run_ID=0, args=None):
         args.imagesize=96
         args.framestack=4
 
-    env = AtariEnv
-    config = set_config(args, game)
     if torch.cuda.is_available() and not args.disable_cuda:
         affinity = dict(cuda_idx=torch.cuda.current_device())
     else:
         affinity = dict()
 
 
+    if "MiniGrid" in game:
+        args.imagesize=16
+        args.framestack=1
+        env = MiniGridEnv
+        env_kwargs = dict(game=game)
+        eval_env_kwargs = dict(game=game)
+        args.architecture = "gridworld"
+        config = set_config(args, game)
+    elif "Minatar" in game:
+        args.imagesize=10
+        args.framestack=1
+        env = MinAtarEnv
+        env_kwargs = dict(game=game)
+        eval_env_kwargs = dict(game=game)
+        args.architecture = "gridworld"
+        config = set_config(args, game)
+    else:
+        env = AtariEnv
+        config = set_config(args, game)
+        env_kwargs = config["env"]
+        eval_env_kwargs = config["eval_env"]
+
+
+
     sampler = SerialSampler(
         EnvCls=env,
         TrajInfoCls=AtariTrajInfo,  # default traj info + GameScore
-        env_kwargs=config["env"],
-        eval_env_kwargs=config["eval_env"],
+        env_kwargs=env_kwargs,
+        eval_env_kwargs=eval_env_kwargs,
         batch_T=config['sampler']['batch_T'],
         batch_B=config['sampler']['batch_B'],
         max_decorrelation_steps=0,
