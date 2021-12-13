@@ -247,6 +247,17 @@ def parse_state_portions(tasks, indexes,
     df.loc["median"] = median
     print(df)
 
+    plt.scatter(df[label+"new_states_portion"], df["relative performance"])
+    plt.xlabel('new states portion')
+    plt.ylabel('relative performance')
+    if not name:
+        name = os.path.expanduser(os.path.join(dir, "".join(indexes)+"states_portion.png"))
+    else:
+        name = os.path.expanduser(os.path.join(dir, name))
+    Path(os.path.dirname(name)).mkdir(parents=True, exist_ok=True)
+    plt.savefig(name)
+
+
 def plot_graph(task, index, dir, label="", name="graph"):
     path = os.path.join(dir, index, "edges.json")
     with open(path) as json_file:
