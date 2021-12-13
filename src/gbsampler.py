@@ -26,13 +26,19 @@ class State2Index:
         self.hashing_method = hashing_method
         self.max = 0
         self.states = []
+        self.last_key = ""
+        self.stay_count = 0
 
-    def get_index(self, state):
-        if isinstance(state, torch.Tensor):
-            np_state = state.cpu().numpy()
-        else:
-            np_state = state
-        key = hashing(np_state, self.hashing_method)
+    def get_index(self, key):
+        if not isinstance(key, tuple):
+            if isinstance(key, torch.Tensor):
+                np_state = key.cpu().numpy()
+            elif isinstance(key, np.ndarray):
+                np_state = key
+            else:
+                raise ValueError()
+            key = hashing(np_state, self.hashing_method)
+            key = (key, 0)
         if key in self.data:
             return self.data[key]
         else:
@@ -44,19 +50,25 @@ class State2Index:
     def get_states(self, indexs):
         return [self.states[i] for i in indexs]
 
-    def append_state(self, state):
+    def append_state(self, state, increase_stay=True):
         if isinstance(state, torch.Tensor):
             np_state = state.cpu().numpy()
         else:
             np_state = state
         key = hashing(np_state, self.hashing_method)
+
+        if self.last_key != key:
+            self.stay_count = 0
+        elif increase_stay:
+            self.stay_count += 1
+        self.last_key = key
+        key = (key, self.stay_count)
+
         if key not in self.data:
             self.data[key] = len(self.data)
             self.states.append(state)
             self.max += 1
-            return False
-        else:
-            return True
+        return key
 
 class TransitionFreq():
     def __init__(self):
@@ -65,9 +77,9 @@ class TransitionFreq():
 
     def append(self, s, a, r, d, s1):
         self.transition_count += 1
-        s = int(s)
+        s = s
         a = int(a)
-        s1 = int(s1)
+        s1 = s1
         if s not in self.freq:
             self.freq[s] = {}
         if a not in self.freq[s]:
@@ -132,8 +144,8 @@ class CpuResetGraphCollector(DecorrelatingStartCollector):
         env_buf.prev_reward[0] = reward
         self.agent.sample_mode(itr)
 
-        self.s2i.append_state(agent_inputs.observation[0])
-        s_idx = self.s2i.get_index(agent_inputs.observation[0])
+        o_key = self.s2i.append_state(agent_inputs.observation[0], increase_stay=False)
+        s_idx = self.s2i.get_index(o_key)
 
         for t in range(self.batch_T):
             env_buf.observation[t] = observation
@@ -146,8 +158,8 @@ class CpuResetGraphCollector(DecorrelatingStartCollector):
             o, r, d, env_info = env.step(action[b])
 
             #env.render()
-            self.s2i.append_state(o)
-            s1_idx = self.s2i.get_index(o)
+            o_key = self.s2i.append_state(o)
+            s1_idx = self.s2i.get_index(o_key)
             self.transition_freq.append(s_idx, action[b], r, d, s1_idx)
             s_idx = s1_idx
 
@@ -158,8 +170,8 @@ class CpuResetGraphCollector(DecorrelatingStartCollector):
                 traj_infos[b] = self.TrajInfoCls()
                 o = env.reset()
 
-                self.s2i.append_state(o)
-                s_idx = self.s2i.get_index(o)
+                o_key = self.s2i.append_state(o)
+                s_idx = self.s2i.get_index(o_key)
                 #print("end game")
             if d:
                 self.agent.reset_one(idx=b)
