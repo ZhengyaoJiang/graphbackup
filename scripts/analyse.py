@@ -248,6 +248,7 @@ def parse_state_portions(tasks, indexes,
     print(df)
 
     plt.scatter(df[label+"new_states_portion"], df["relative performance"])
+    plt.axhline(1.0, color="r", linestyle="dashed")
     plt.xlabel('new states portion')
     plt.ylabel('relative performance')
     if not name:
