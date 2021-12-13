@@ -45,8 +45,14 @@ def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, 
                         last = (last-random_score) / (float(human_scores[task_n])-random_score) *100
                     else:
                         last = df["mean_episode_return"].iloc[-nb_mean:]# / human_scores[task_n] * 100
-                    ht_data[label].append(last.mean())
-                    mean_l.append(last.mean())
+                    if summary == "mean":
+                        metric = last.mean()
+                    elif summary == "median":
+                        metric = last.median()
+                    else:
+                        raise ValueError()
+                    ht_data[label].append(metric)
+                    mean_l.append(metric)
                     std_l.append(last.std())
                 except FileNotFoundError:
                     print(f"skip {task_id}-{int(code)+task_n}-{round+1}")

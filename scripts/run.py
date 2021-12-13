@@ -77,7 +77,6 @@ def build_and_train(game="pong", run_ID=0, args=None):
         eval_max_steps=config['sampler']['eval_max_steps'],
         eval_max_trajectories=config["sampler"]["eval_max_trajectories"],
     )
-    args.discount = config["algo"]["discount"]
     algo = SPRCategoricalDQN(optim_kwargs=config["optim"], jumps=args.jumps, breath=args.breath,
                               **config["algo"])  # Run with defaults.
     agent = SPRAgent(ModelCls=SPRCatDqnModel, model_kwargs=config["model"], **config["agent"])
@@ -129,6 +128,7 @@ if __name__ == "__main__":
     parser.add_argument('--replay-ratio', type=int, default=64)
     parser.add_argument('--dynamics-blocks', type=int, default=0)
     parser.add_argument('--residual-tm', type=int, default=0.)
+    parser.add_argument('--discount', type=float, default=0.99)
     parser.add_argument('--n-step', type=int, default=10)
     parser.add_argument('--breath', type=int, default=10)
     parser.add_argument('--batch-size', type=int, default=32)

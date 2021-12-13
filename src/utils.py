@@ -37,6 +37,7 @@ def set_config(args, game):
     config['algo']['eps_steps'] = args.eps_steps
     config["algo"]["clip_grad_norm"] = args.max_grad_norm
     config['algo']['pri_alpha'] = 0.5
+    config['algo']['discount'] = args.discount
     config['algo']['pri_beta_steps'] = int(10e4)
     config['algo']['double_dqn'] = args.double
     config['optim']['eps'] = 0.00015
