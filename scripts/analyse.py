@@ -242,7 +242,7 @@ def parse_state_portions(tasks, indexes,
 
     df = pd.DataFrame(data, index=tasks)
     df["relative performance"] = df[labels[1]] / df[labels[0]]
-    df = df[label+"new_states_portion"]>0.1
+    df = df.loc[df[label+"new_states_portion"]>0.1]
     mean, median = df.mean(), df.median()
     df.loc["mean"] = mean
     df.loc["median"] = median
