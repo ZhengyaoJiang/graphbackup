@@ -189,7 +189,7 @@ class SPRCatDqnModel(torch.nn.Module):
             self.shared_encoder = shared_encoder
             assert not (self.shared_encoder and self.momentum_encoder)
 
-            # in case someone tries something silly like --local-graphbackup 2
+            # in case someone tries something silly like --local-spr 2
             self.num_sprs = int(bool(self.local_spr)) + \
                             int(bool(self.global_spr))
 
