@@ -5,11 +5,11 @@ import json
 import matplotlib.pyplot as plt
 import matplotlib as pylab
 from random import choices
-from rlpyt.utils.tensor import select_at_indexes, valid_mean
-from rlpyt.samplers.collectors import (DecorrelatingStartCollector,
+from src.rlpyt.rlpyt.utils.tensor import select_at_indexes, valid_mean
+from src.rlpyt.rlpyt.samplers.collectors import (DecorrelatingStartCollector,
     BaseEvalCollector)
-from rlpyt.agents.base import AgentInputs
-from rlpyt.utils.buffer import (torchify_buffer, numpify_buffer, buffer_from_example,
+from src.rlpyt.rlpyt.agents.base import AgentInputs
+from src.rlpyt.rlpyt.utils.buffer import (torchify_buffer, numpify_buffer, buffer_from_example,
     buffer_method)
 from typing import Optional, Dict, Tuple, List, Union
 

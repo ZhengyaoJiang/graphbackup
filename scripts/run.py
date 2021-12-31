@@ -7,10 +7,10 @@ should improve the efficiency of the forward/backward passes during training.
 (But both settings may impact hyperparameter selection and learning.)
 
 """
-from rlpyt.experiments.configs.atari.dqn.atari_dqn import configs
-from rlpyt.samplers.serial.sampler import SerialSampler
-from rlpyt.envs.atari.atari_env import AtariTrajInfo
-from rlpyt.utils.logging.context import logger_context
+from src.rlpyt.rlpyt.experiments.configs.atari.dqn.atari_dqn import configs
+from src.rlpyt.rlpyt.samplers.serial.sampler import SerialSampler
+from src.rlpyt.rlpyt.envs.atari.atari_env import AtariTrajInfo
+from src.rlpyt.rlpyt.utils.logging.context import logger_context
 
 import torch
 import numpy as np

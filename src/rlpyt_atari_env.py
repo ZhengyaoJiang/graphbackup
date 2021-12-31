@@ -10,10 +10,10 @@ import matplotlib.pyplot as plt
 from collections import namedtuple
 from gym.utils import seeding
 
-from rlpyt.envs.base import Env, EnvStep
-from rlpyt.spaces.int_box import IntBox
-from rlpyt.utils.quick_args import save__init__args
-from rlpyt.samplers.collections import TrajInfo
+from src.rlpyt.rlpyt.envs.base import Env, EnvStep
+from src.rlpyt.rlpyt.spaces.int_box import IntBox
+from src.rlpyt.rlpyt.utils.quick_args import save__init__args
+from src.rlpyt.rlpyt.samplers.collections import TrajInfo
 
 
 EnvInfo = namedtuple("EnvInfo", ["game_score", "traj_done"])

@@ -2,8 +2,8 @@ import torch
 import torch.nn.functional as F
 import torch.nn as nn
 
-from rlpyt.models.utils import scale_grad, update_state_dict
-from rlpyt.utils.tensor import infer_leading_dims, restore_leading_dims
+from src.rlpyt.rlpyt.models.utils import scale_grad, update_state_dict
+from src.rlpyt.rlpyt.utils.tensor import infer_leading_dims, restore_leading_dims
 from src.resnet import ResNetRepresentation
 from src.utils import count_parameters, dummy_context_mgr
 import numpy as np

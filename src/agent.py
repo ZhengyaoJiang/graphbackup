@@ -1,7 +1,7 @@
 import torch
 from src.rlpyt.rlpyt.agents.dqn.atari.atari_catdqn_agent import AtariCatDqnAgent
-from rlpyt.utils.buffer import buffer_to
-from rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.utils.buffer import buffer_to
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
 AgentInputs = namedarraytuple("AgentInputs",
     ["observation", "prev_action", "prev_reward"])
 AgentInfo = namedarraytuple("AgentInfo", "p")
