@@ -409,8 +409,10 @@ class SPRCategoricalDQN(CategoricalDQN):
                          train=True)  # [B,A,P]
 
         self.agent.model.eval()
+        self.agent.target_model.eval()
         rl_loss, KL = self.rl_loss(log_pred_ps[0], samples, 0)
         self.agent.model.train()
+        self.agent.target_model.eval()
         if len(pred_rew) > 0:
             pred_rew = torch.stack(pred_rew, 0)
             with torch.no_grad():

@@ -37,7 +37,6 @@ class DqnAgent(EpsilonGreedyAgentMixin, BaseAgent):
         self.target_model = self.ModelCls(**self.env_model_kwargs,
             **self.model_kwargs)
         self.target_model.load_state_dict(self.model.state_dict())
-        self.target_model.eval()
         self.distribution = EpsilonGreedy(dim=env_spaces.action.n)
         if env_ranks is not None:
             self.make_vec_eps(global_B, env_ranks)
