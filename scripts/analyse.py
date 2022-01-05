@@ -54,7 +54,7 @@ def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, 
                     ht_data[label].append(metric)
                     mean_l.append(metric)
                     std_l.append(last.std())
-                except FileNotFoundError:
+                except Exception:
                     print(f"skip {task_id}-{int(code)+task_n}-{round+1}")
             mean_return = np.mean(mean_l)
             mean_std = np.mean(std_l)
@@ -102,7 +102,7 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
                     else:
                         returns = df["mean_episode_return"].ewm(span=1).mean()
                     curves[round]=returns
-                except FileNotFoundError:
+                except Exception:
                     print(f"skip {task_id}-{int(code) + task_n}-{round + 1}")
             curvesdf = pd.concat(list(curves.values()), axis=1)
             curvesdf = curvesdf[curvesdf.index <= steps]
@@ -232,7 +232,7 @@ def parse_state_portions(tasks, indexes,
                     portion.append(df["number_of_states"]/(df["step"]+1))
                     mean_l.append(last.mean())
                     std_l.append(last.std())
-                except FileNotFoundError:
+                except Exception:
                     print(f"skip {task_id}-{int(code)+task_n}-{round+1}")
             mean_return = np.mean(mean_l)
             mean_std = np.mean(std_l)
@@ -242,7 +242,7 @@ def parse_state_portions(tasks, indexes,
 
     df = pd.DataFrame(data, index=tasks)
     df["relative performance"] = df[labels[1]] / df[labels[0]]
-    df = df.loc[df[label+"new_states_portion"]>0.1]
+    #df = df.loc[df[label+"new_states_portion"]>0.1]
     mean, median = df.mean(), df.median()
     df.loc["mean"] = mean
     df.loc["median"] = median
