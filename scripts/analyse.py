@@ -114,17 +114,13 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
             tasks_summary = tasks_df.median(axis=1).values.transpose()
             tasks_std = pd.concat(data_std, axis=1)
             tasks_std = tasks_std.median(axis=1).values.transpose()
-            plt.plot(curvesdf.index, tasks_summary, linewidth=1.5, label=label)
-            plt.fill_between(curvesdf.index, tasks_summary-tasks_std,
-                             tasks_summary-tasks_std, alpha=0.3)
+            plt.errorbar(curvesdf.index, tasks_summary, tasks_std, linewidth=1.5, label=label)
         elif summary == "mean":
             tasks_df = pd.concat(data, axis=1)
             tasks_summary = tasks_df.mean(axis=1).values.transpose()
             tasks_std = pd.concat(data_std, axis=1)
             tasks_std = tasks_std.mean(axis=1).values.transpose()
-            plt.plot(curvesdf.index, tasks_summary, linewidth=1.5, label=label)
-            plt.fill_between(curvesdf.index, tasks_summary-tasks_std,
-                             tasks_summary-tasks_std, alpha=0.3)
+            plt.errorbar(curvesdf.index, tasks_summary, tasks_std, linewidth=1.5, label=label)
         else:
             raise ValueError()
         plt.xlabel('step')

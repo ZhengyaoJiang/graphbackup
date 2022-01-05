@@ -11,6 +11,7 @@ from src.rlpyt.rlpyt.experiments.configs.atari.dqn.atari_dqn import configs
 from src.rlpyt.rlpyt.samplers.serial.sampler import SerialSampler
 from src.rlpyt.rlpyt.envs.atari.atari_env import AtariTrajInfo
 from src.rlpyt.rlpyt.utils.logging.context import logger_context
+from pympler import asizeof, classtracker, tracker
 
 import torch
 import numpy as np
@@ -28,6 +29,8 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 torch.set_num_threads(4)
 
 def build_and_train(game="pong", run_ID=0, args=None):
+    from pympler import tracker
+    tr = tracker.SummaryTracker()
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
     if args.architecture == "efficient-zero":

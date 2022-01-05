@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+from pympler import asizeof, classtracker, tracker
 
 from rlpyt.utils.collections import namedarraytuple
 from collections import namedtuple
