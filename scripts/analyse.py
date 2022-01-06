@@ -118,7 +118,7 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
         tasks_summary = tasks_df.mean(axis=1).values.transpose()
         tasks_std = pd.concat(data_std, axis=1)
         tasks_std = tasks_std.mean(axis=1).values.transpose()
-        plt.errorbar(curvesdf.index, tasks_summary, tasks_std, linewidth=1.5, label=label, fmt='.k', alpha=0.8)
+        plt.errorbar(curvesdf.index, tasks_summary, tasks_std, linewidth=1.5, label=label, alpha=0.8)
         plt.xlabel('step')
         if human_scores:
             plt.ylabel(f'{summary} normalised score (%)')
