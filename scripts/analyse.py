@@ -123,7 +123,7 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
         else:
             plt.ylabel(f'{summary} score')
         plt.legend(labels=labels, prop={'size': 7})
-        plt.title(name.split("/")[-1].replace("_", " ").replace("-", " "))
+        plt.title(name.split("/")[:-1].replace("_", " ").replace("-", " "))
         if not name:
             name = os.path.expanduser(os.path.join(dir, "".join(indexes) + "return.png"))
         else:
