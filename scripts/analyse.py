@@ -116,14 +116,14 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
         tasks_df = pd.concat(data, axis=1)
         tasks_summary = tasks_df.mean(axis=1).values.transpose()
         tasks_std = tasks_df.std(axis=1).values.transpose()
-        plt.errorbar(curvesdf.index, tasks_summary, tasks_std, linewidth=1.5, label=label, alpha=0.8)
+        plt.errorbar(curvesdf.index, tasks_summary, tasks_std, linewidth=1.5, label=label, alpha=0.8, elinewidth=0.8, capsize=1.0)
         plt.xlabel('step')
         if human_scores:
             plt.ylabel(f'{summary} normalised score (%)')
         else:
             plt.ylabel(f'{summary} score')
         plt.legend(labels=labels, prop={'size': 7})
-        plt.title(name.split("/")[-1].replace("_", " ").replace("-", " "))
+        plt.title(name.split("/")[:-1].replace("_", " ").replace("-", " "))
         if not name:
             name = os.path.expanduser(os.path.join(dir, "".join(indexes) + "return.png"))
         else:
