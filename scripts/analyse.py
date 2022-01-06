@@ -112,12 +112,10 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
             elif summary == "median":
                 summary_curve = curvesdf.median(axis=1)
             data.append(summary_curve)
-            data_std.append(curvesdf.std(axis=1))
 
         tasks_df = pd.concat(data, axis=1)
         tasks_summary = tasks_df.mean(axis=1).values.transpose()
-        tasks_std = pd.concat(data_std, axis=1)
-        tasks_std = tasks_std.mean(axis=1).values.transpose()
+        tasks_std = tasks_df.std(axis=1).values.transpose()
         plt.errorbar(curvesdf.index, tasks_summary, tasks_std, linewidth=1.5, label=label, alpha=0.8)
         plt.xlabel('step')
         if human_scores:
