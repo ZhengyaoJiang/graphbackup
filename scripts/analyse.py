@@ -83,12 +83,13 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
     for group_n, (index, label) in enumerate(zip(indexes, labels)):
         data = []
         data_std = []
-        for task_n, task in enumerate(tasks):
-            if isinstance(task_masks, list):
-                if task_masks[task_n] == "0":
-                    continue
+
+        for round in range(repeats):
             curves = {}
-            for round in range(repeats):
+            for task_n, task in enumerate(tasks):
+                if isinstance(task_masks, list):
+                    if task_masks[task_n] == "0":
+                        continue
                 task_id, code = index.split("-")
                 try:
                     df = pd.read_csv(os.path.join(dir, f"{task_id}-{int(code)+task_n}-{round+1}", "logs.csv"), index_col="step")
@@ -106,23 +107,18 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
                     print(f"skip {task_id}-{int(code) + task_n}-{round + 1}")
             curvesdf = pd.concat(list(curves.values()), axis=1)
             curvesdf = curvesdf[curvesdf.index <= steps]
-            summary_curve = curvesdf.mean(axis=1)
+            if summary == "mean":
+                summary_curve = curvesdf.mean(axis=1)
+            elif summary == "median":
+                summary_curve = curvesdf.median(axis=1)
             data.append(summary_curve)
             data_std.append(curvesdf.std(axis=1))
-        if summary == "median":
-            tasks_df = pd.concat(data, axis=1)
-            tasks_summary = tasks_df.median(axis=1).values.transpose()
-            tasks_std = pd.concat(data_std, axis=1)
-            tasks_std = tasks_std.median(axis=1).values.transpose()
-            plt.errorbar(curvesdf.index, tasks_summary, tasks_std, linewidth=1.5, label=label)
-        elif summary == "mean":
-            tasks_df = pd.concat(data, axis=1)
-            tasks_summary = tasks_df.mean(axis=1).values.transpose()
-            tasks_std = pd.concat(data_std, axis=1)
-            tasks_std = tasks_std.mean(axis=1).values.transpose()
-            plt.errorbar(curvesdf.index, tasks_summary, tasks_std, linewidth=1.5, label=label)
-        else:
-            raise ValueError()
+
+        tasks_df = pd.concat(data, axis=1)
+        tasks_summary = tasks_df.mean(axis=1).values.transpose()
+        tasks_std = pd.concat(data_std, axis=1)
+        tasks_std = tasks_std.mean(axis=1).values.transpose()
+        plt.errorbar(curvesdf.index, tasks_summary, tasks_std, linewidth=1.5, label=label, fmt='.k', alpha=0.8)
         plt.xlabel('step')
         if human_scores:
             plt.ylabel(f'{summary} normalised score (%)')
