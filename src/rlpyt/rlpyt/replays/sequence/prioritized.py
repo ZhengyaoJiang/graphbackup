@@ -1,13 +1,13 @@
 
 import math
 
-from rlpyt.replays.sequence.n_step import (SequenceNStepReturnBuffer,
+from src.rlpyt.rlpyt.replays.sequence.n_step import (SequenceNStepReturnBuffer,
     SamplesFromReplay)
-from rlpyt.replays.async_ import AsyncReplayBufferMixin
-from rlpyt.replays.sum_tree import SumTree, AsyncSumTree
-from rlpyt.utils.collections import namedarraytuple
-from rlpyt.utils.quick_args import save__init__args
-from rlpyt.utils.buffer import torchify_buffer, numpify_buffer
+from src.rlpyt.rlpyt.replays.async_ import AsyncReplayBufferMixin
+from src.rlpyt.rlpyt.replays.sum_tree import SumTree, AsyncSumTree
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.utils.quick_args import save__init__args
+from src.rlpyt.rlpyt.utils.buffer import torchify_buffer, numpify_buffer
 
 SamplesFromReplayPri = namedarraytuple("SamplesFromReplayPri",
     SamplesFromReplay._fields + ("is_weights",))

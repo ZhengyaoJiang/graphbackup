@@ -1,7 +1,7 @@
 
 
 import pyprind
-from rlpyt.utils.logging import logger
+from src.rlpyt.rlpyt.utils.logging import logger
 
 
 class ProgBarCounter:

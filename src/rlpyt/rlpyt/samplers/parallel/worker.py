@@ -3,9 +3,9 @@ import psutil
 import time
 import torch
 
-from rlpyt.utils.collections import AttrDict
-from rlpyt.utils.logging import logger
-from rlpyt.utils.seed import set_seed
+from src.rlpyt.rlpyt.utils.collections import AttrDict
+from src.rlpyt.rlpyt.utils.logging import logger
+from src.rlpyt.rlpyt.utils.seed import set_seed
 
 
 def initialize_worker(rank, seed=None, cpu=None, torch_threads=None):

@@ -1,17 +1,17 @@
 
 import sys
 
-from rlpyt.utils.launching.affinity import affinity_from_code
-from rlpyt.samplers.parallel.cpu.sampler import CpuSampler
-from rlpyt.samplers.parallel.cpu.collectors import CpuWaitResetCollector
-from rlpyt.envs.atari.atari_env import AtariEnv, AtariTrajInfo
-from rlpyt.algos.pg.a2c import A2C
-from rlpyt.agents.pg.atari import AtariFfAgent
-from rlpyt.runners.minibatch_rl import MinibatchRl
-from rlpyt.utils.logging.context import logger_context
-from rlpyt.utils.launching.variant import load_variant, update_config
+from src.rlpyt.rlpyt.utils.launching.affinity import affinity_from_code
+from src.rlpyt.rlpyt.samplers.parallel.cpu.sampler import CpuSampler
+from src.rlpyt.rlpyt.samplers.parallel.cpu.collectors import CpuWaitResetCollector
+from src.rlpyt.rlpyt.envs.atari.atari_env import AtariEnv, AtariTrajInfo
+from src.rlpyt.rlpyt.algos.pg.a2c import A2C
+from src.rlpyt.rlpyt.agents.pg.atari import AtariFfAgent
+from src.rlpyt.rlpyt.runners.minibatch_rl import MinibatchRl
+from src.rlpyt.rlpyt.utils.logging.context import logger_context
+from src.rlpyt.rlpyt.utils.launching.variant import load_variant, update_config
 
-from rlpyt.experiments.configs.atari.pg.atari_ff_a2c import configs
+from src.rlpyt.rlpyt.experiments.configs.atari.pg.atari_ff_a2c import configs
 
 
 def build_and_train(slot_affinity_code, log_dir, run_ID, config_key):

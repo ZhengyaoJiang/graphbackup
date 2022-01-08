@@ -1,5 +1,5 @@
 
-from rlpyt.utils.collections import AttrDict
+from src.rlpyt.rlpyt.utils.collections import AttrDict
 
 # Readable-to-less-readable abbreviations.
 N_GPU = "gpu"

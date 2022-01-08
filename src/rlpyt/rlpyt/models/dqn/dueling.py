@@ -1,8 +1,8 @@
 
 import torch
 
-from rlpyt.models.mlp import MlpModel
-from rlpyt.models.utils import scale_grad
+from src.rlpyt.rlpyt.models.mlp import MlpModel
+from src.rlpyt.rlpyt.models.utils import scale_grad
 
 
 class DuelingHeadModel(torch.nn.Module):

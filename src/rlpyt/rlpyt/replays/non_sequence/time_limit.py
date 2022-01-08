@@ -1,13 +1,13 @@
 
 import numpy as np
 
-from rlpyt.replays.non_sequence.n_step import (NStepReturnBuffer,
+from src.rlpyt.rlpyt.replays.non_sequence.n_step import (NStepReturnBuffer,
     SamplesFromReplay)
-from rlpyt.replays.non_sequence.uniform import UniformReplay
-from rlpyt.replays.non_sequence.prioritized import PrioritizedReplay
-from rlpyt.replays.async_ import AsyncReplayBufferMixin
-from rlpyt.utils.collections import namedarraytuple
-from rlpyt.utils.buffer import torchify_buffer, buffer_from_example
+from src.rlpyt.rlpyt.replays.non_sequence.uniform import UniformReplay
+from src.rlpyt.rlpyt.replays.non_sequence.prioritized import PrioritizedReplay
+from src.rlpyt.rlpyt.replays.async_ import AsyncReplayBufferMixin
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.utils.buffer import torchify_buffer, buffer_from_example
 
 
 SamplesFromReplayTL = namedarraytuple("SamplesFromReplayTL",

@@ -2,11 +2,11 @@
 import numpy as np
 import torch
 
-from rlpyt.agents.base import (AgentStep, BaseAgent, RecurrentAgentMixin,
+from src.rlpyt.rlpyt.agents.base import (AgentStep, BaseAgent, RecurrentAgentMixin,
     AlternatingRecurrentAgentMixin)
-from rlpyt.agents.pg.base import AgentInfo, AgentInfoRnn
-from rlpyt.distributions.gaussian import Gaussian, DistInfoStd
-from rlpyt.utils.buffer import buffer_to, buffer_func, buffer_method
+from src.rlpyt.rlpyt.agents.pg.base import AgentInfo, AgentInfoRnn
+from src.rlpyt.rlpyt.distributions.gaussian import Gaussian, DistInfoStd
+from src.rlpyt.rlpyt.utils.buffer import buffer_to, buffer_func, buffer_method
 
 # MIN_STD = 1e-6
 

@@ -2,12 +2,12 @@ import torch
 import numpy as np
 from pympler import asizeof, classtracker, tracker
 
-from rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
 from collections import namedtuple
-from rlpyt.algos.dqn.cat_dqn import CategoricalDQN
-from rlpyt.utils.tensor import select_at_indexes, valid_mean
-from rlpyt.algos.utils import valid_from_done
-from rlpyt.utils.logging import logger
+from src.rlpyt.rlpyt.algos.dqn.cat_dqn import CategoricalDQN
+from src.rlpyt.rlpyt.utils.tensor import select_at_indexes, valid_mean
+from src.rlpyt.rlpyt.algos.utils import valid_from_done
+from src.rlpyt.rlpyt.utils.logging import logger
 from src.rlpyt_buffer import AsyncPrioritizedSequenceReplayFrameBufferExtended, \
     AsyncUniformSequenceReplayFrameBufferExtended
 from src.models import from_categorical, to_categorical
@@ -18,7 +18,7 @@ from functools import partial
 SamplesToBuffer = namedarraytuple("SamplesToBuffer",
     ["observation", "action", "reward", "done"])
 ModelSamplesToBuffer = namedarraytuple("SamplesToBuffer",
-    ["observation", "action", "reward", "done", "value"])
+    ["observation", "action", "reward", "done", "value", "state_index"])
 
 OptInfo = namedtuple("OptInfo", ["loss", "gradNorm", "tdAbsErr"])
 ModelOptInfo = namedtuple("OptInfo", ["loss", "gradNorm",
@@ -81,6 +81,7 @@ class SPRCategoricalDQN(CategoricalDQN):
             reward=examples["reward"],
             done=examples["done"],
             value=examples["agent_info"].p,
+            state_index=examples["state_index"]
         )
         replay_kwargs = dict(
             example=example_to_buffer,
@@ -136,6 +137,7 @@ class SPRCategoricalDQN(CategoricalDQN):
             reward=samples.env.reward,
             done=samples.env.done,
             value=samples.agent.agent_info.p,
+            state_index=samples.env.state_index
         )
 
     def optimize_agent(self, itr, samples=None, sampler_itr=None):

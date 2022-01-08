@@ -1,20 +1,20 @@
 
 import sys
 
-from rlpyt.utils.launching.affinity import affinity_from_code
-# from rlpyt.samplers.serial_sampler import SerialSampler
-from rlpyt.samplers.async_.async_gpu_sampler import AsyncGpuSampler
-# from rlpyt.samplers.cpu.collectors import ResetCollector
-from rlpyt.samplers.async_.collectors import DbGpuResetCollector
-from rlpyt.envs.gym import make as gym_make
-from rlpyt.algos.qpg.sac import SAC
-from rlpyt.agents.qpg.sac_agent import SacAgent
-# from rlpyt.runners.minibatch_rl_eval import MinibatchRlEval
-from rlpyt.runners.async_rl import AsyncRlEval
-from rlpyt.utils.logging.context import logger_context
-from rlpyt.utils.launching.variant import load_variant, update_config
+from src.rlpyt.rlpyt.utils.launching.affinity import affinity_from_code
+# from src.rlpyt.rlpyt.samplers.serial_sampler import SerialSampler
+from src.rlpyt.rlpyt.samplers.async_.async_gpu_sampler import AsyncGpuSampler
+# from src.rlpyt.rlpyt.samplers.cpu.collectors import ResetCollector
+from src.rlpyt.rlpyt.samplers.async_.collectors import DbGpuResetCollector
+from src.rlpyt.rlpyt.envs.gym import make as gym_make
+from src.rlpyt.rlpyt.algos.qpg.sac import SAC
+from src.rlpyt.rlpyt.agents.qpg.sac_agent import SacAgent
+# from src.rlpyt.rlpyt.runners.minibatch_rl_eval import MinibatchRlEval
+from src.rlpyt.rlpyt.runners.async_rl import AsyncRlEval
+from src.rlpyt.rlpyt.utils.logging.context import logger_context
+from src.rlpyt.rlpyt.utils.launching.variant import load_variant, update_config
 
-from rlpyt.experiments.configs.mujoco.qpg.mujoco_sac import configs
+from src.rlpyt.rlpyt.experiments.configs.mujoco.qpg.mujoco_sac import configs
 
 
 def build_and_train(slot_affinity_code, log_dir, run_ID, config_key):

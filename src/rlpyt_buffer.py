@@ -2,20 +2,20 @@
 from __future__ import division
 import torch
 
-from rlpyt.replays.sequence.prioritized import SamplesFromReplayPri
+from src.rlpyt.rlpyt.replays.sequence.prioritized import SamplesFromReplayPri
 
-from rlpyt.replays.sequence.n_step import SamplesFromReplay
-from rlpyt.replays.sequence.frame import AsyncPrioritizedSequenceReplayFrameBuffer, \
+from src.rlpyt.rlpyt.replays.sequence.n_step import SamplesFromReplay
+from src.rlpyt.rlpyt.replays.sequence.frame import AsyncPrioritizedSequenceReplayFrameBuffer, \
     AsyncUniformSequenceReplayFrameBuffer, PrioritizedSequenceReplayFrameBuffer
-from rlpyt.utils.buffer import torchify_buffer, numpify_buffer
-from rlpyt.utils.collections import namedarraytuple
-from rlpyt.utils.misc import extract_sequences
+from src.rlpyt.rlpyt.utils.buffer import torchify_buffer, numpify_buffer
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.utils.misc import extract_sequences
 import traceback
 
 PrioritizedSamples = namedarraytuple("PrioritizedSamples",
                                   ["samples", "priorities"])
 SamplesToBuffer = namedarraytuple("SamplesToBuffer",
-                                  ["observation", "action", "reward", "done", "policy_probs", "value"])
+                                  ["observation", "action", "reward", "done", "policy_probs", "value", "state_index"])
 SamplesFromReplayExt = namedarraytuple("SamplesFromReplayPriExt",
                                        SamplesFromReplay._fields + ("values", "age"))
 SamplesFromReplayPriExt = namedarraytuple("SamplesFromReplayPriExt",

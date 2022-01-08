@@ -2,9 +2,9 @@
 import torch
 import torch.nn.functional as F
 
-from rlpyt.utils.collections import namedarraytuple
-from rlpyt.utils.tensor import infer_leading_dims, restore_leading_dims
-from rlpyt.models.conv2d import Conv2dHeadModel
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.utils.tensor import infer_leading_dims, restore_leading_dims
+from src.rlpyt.rlpyt.models.conv2d import Conv2dHeadModel
 
 
 RnnState = namedarraytuple("RnnState", ["h", "c"])  # For downstream namedarraytuples to work

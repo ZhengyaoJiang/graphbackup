@@ -5,10 +5,10 @@ import atari_py
 import cv2
 from collections import namedtuple
 
-from rlpyt.envs.base import Env, EnvStep
-from rlpyt.spaces.int_box import IntBox
-from rlpyt.utils.quick_args import save__init__args
-from rlpyt.samplers.collections import TrajInfo
+from src.rlpyt.rlpyt.envs.base import Env, EnvStep
+from src.rlpyt.rlpyt.spaces.int_box import IntBox
+from src.rlpyt.rlpyt.utils.quick_args import save__init__args
+from src.rlpyt.rlpyt.samplers.collections import TrajInfo
 
 
 W, H = (80, 104)  # Crop two rows, then downsample by 2x (fast, clean image).
@@ -25,8 +25,8 @@ class AtariTrajInfo(TrajInfo):
         super().__init__(**kwargs)
         self.GameScore = 0
 
-    def step(self, observation, action, reward, done, agent_info, env_info):
-        super().step(observation, action, reward, done, agent_info, env_info)
+    def step(self, observation, action, reward, done, agent_info, env_info, state_index):
+        super().step(observation, action, reward, done, agent_info, env_info, state_index)
         self.GameScore += getattr(env_info, "game_score", 0)
 
 

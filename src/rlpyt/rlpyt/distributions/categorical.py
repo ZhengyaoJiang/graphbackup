@@ -1,10 +1,10 @@
 
 import torch
 
-from rlpyt.distributions.base import Distribution
-from rlpyt.distributions.discrete import DiscreteMixin
-from rlpyt.utils.collections import namedarraytuple
-from rlpyt.utils.tensor import valid_mean, select_at_indexes
+from src.rlpyt.rlpyt.distributions.base import Distribution
+from src.rlpyt.rlpyt.distributions.discrete import DiscreteMixin
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.utils.tensor import valid_mean, select_at_indexes
 
 EPS = 1e-8
 

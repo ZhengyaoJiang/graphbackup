@@ -1,6 +1,6 @@
 
-from rlpyt.samplers.parallel.gpu.sampler import GpuSamplerBase
-from rlpyt.samplers.parallel.gpu.action_server import (AlternatingActionServer,
+from src.rlpyt.rlpyt.samplers.parallel.gpu.sampler import GpuSamplerBase
+from src.rlpyt.rlpyt.samplers.parallel.gpu.action_server import (AlternatingActionServer,
     NoOverlapAlternatingActionServer)
 
 

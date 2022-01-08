@@ -1,11 +1,11 @@
 
 import torch
 
-from rlpyt.agents.base import (AgentStep, BaseAgent, RecurrentAgentMixin,
+from src.rlpyt.rlpyt.agents.base import (AgentStep, BaseAgent, RecurrentAgentMixin,
     AlternatingRecurrentAgentMixin)
-from rlpyt.agents.pg.base import AgentInfo, AgentInfoRnn
-from rlpyt.distributions.categorical import Categorical, DistInfo
-from rlpyt.utils.buffer import buffer_to, buffer_func, buffer_method
+from src.rlpyt.rlpyt.agents.pg.base import AgentInfo, AgentInfoRnn
+from src.rlpyt.rlpyt.distributions.categorical import Categorical, DistInfo
+from src.rlpyt.rlpyt.utils.buffer import buffer_to, buffer_func, buffer_method
 
 
 class CategoricalPgAgent(BaseAgent):

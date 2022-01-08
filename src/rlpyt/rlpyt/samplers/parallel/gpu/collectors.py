@@ -1,9 +1,9 @@
 
 import numpy as np
 
-from rlpyt.samplers.collectors import (DecorrelatingStartCollector,
+from src.rlpyt.rlpyt.samplers.collectors import (DecorrelatingStartCollector,
     BaseEvalCollector)
-from rlpyt.utils.buffer import buffer_method
+from src.rlpyt.rlpyt.utils.buffer import buffer_method
 
 
 class GpuResetCollector(DecorrelatingStartCollector):

@@ -1,6 +1,6 @@
-from rlpyt.agents.dqn.catdqn_agent import CatDqnAgent
-from rlpyt.models.dqn.atari_catdqn_model import AtariCatDqnModel
-from rlpyt.agents.dqn.atari.mixin import AtariMixin
+from src.rlpyt.rlpyt.agents.dqn.catdqn_agent import CatDqnAgent
+from src.rlpyt.rlpyt.models.dqn.atari_catdqn_model import AtariCatDqnModel
+from src.rlpyt.rlpyt.agents.dqn.atari.mixin import AtariMixin
 
 
 class AtariCatDqnAgent(AtariMixin, CatDqnAgent):

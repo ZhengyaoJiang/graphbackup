@@ -2,17 +2,17 @@
 import torch
 from collections import namedtuple
 
-from rlpyt.algos.dqn.dqn import DQN, SamplesToBuffer
-from rlpyt.agents.base import AgentInputs
-from rlpyt.utils.quick_args import save__init__args
-from rlpyt.utils.logging import logger
-from rlpyt.utils.collections import namedarraytuple
-from rlpyt.replays.sequence.frame import (UniformSequenceReplayFrameBuffer,
+from src.rlpyt.rlpyt.algos.dqn.dqn import DQN, SamplesToBuffer
+from src.rlpyt.rlpyt.agents.base import AgentInputs
+from src.rlpyt.rlpyt.utils.quick_args import save__init__args
+from src.rlpyt.rlpyt.utils.logging import logger
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.replays.sequence.frame import (UniformSequenceReplayFrameBuffer,
     PrioritizedSequenceReplayFrameBuffer, AsyncUniformSequenceReplayFrameBuffer,
     AsyncPrioritizedSequenceReplayFrameBuffer)
-from rlpyt.utils.tensor import select_at_indexes, valid_mean
-from rlpyt.algos.utils import valid_from_done, discount_return_n_step
-from rlpyt.utils.buffer import buffer_to, buffer_method, torchify_buffer
+from src.rlpyt.rlpyt.utils.tensor import select_at_indexes, valid_mean
+from src.rlpyt.rlpyt.algos.utils import valid_from_done, discount_return_n_step
+from src.rlpyt.rlpyt.utils.buffer import buffer_to, buffer_method, torchify_buffer
 
 OptInfo = namedtuple("OptInfo", ["loss", "gradNorm", "tdAbsErr", "priority"])
 SamplesToBufferRnn = namedarraytuple("SamplesToBufferRnn",

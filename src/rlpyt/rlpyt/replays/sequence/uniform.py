@@ -1,8 +1,8 @@
 
 import numpy as np
 
-from rlpyt.replays.sequence.n_step import SequenceNStepReturnBuffer
-from rlpyt.replays.async_ import AsyncReplayBufferMixin
+from src.rlpyt.rlpyt.replays.sequence.n_step import SequenceNStepReturnBuffer
+from src.rlpyt.rlpyt.replays.async_ import AsyncReplayBufferMixin
 
 
 class UniformSequenceReplay:

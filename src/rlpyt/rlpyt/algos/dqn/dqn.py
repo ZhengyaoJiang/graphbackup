@@ -2,15 +2,15 @@
 import torch
 from collections import namedtuple
 
-from rlpyt.algos.base import RlAlgorithm
-from rlpyt.utils.quick_args import save__init__args
-from rlpyt.utils.logging import logger
-from rlpyt.replays.non_sequence.frame import (UniformReplayFrameBuffer,
+from src.rlpyt.rlpyt.algos.base import RlAlgorithm
+from src.rlpyt.rlpyt.utils.quick_args import save__init__args
+from src.rlpyt.rlpyt.utils.logging import logger
+from src.rlpyt.rlpyt.replays.non_sequence.frame import (UniformReplayFrameBuffer,
     PrioritizedReplayFrameBuffer, AsyncUniformReplayFrameBuffer,
     AsyncPrioritizedReplayFrameBuffer)
-from rlpyt.utils.collections import namedarraytuple
-from rlpyt.utils.tensor import select_at_indexes, valid_mean
-from rlpyt.algos.utils import valid_from_done
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.utils.tensor import select_at_indexes, valid_mean
+from src.rlpyt.rlpyt.algos.utils import valid_from_done
 
 OptInfo = namedtuple("OptInfo", ["loss", "gradNorm", "tdAbsErr"])
 SamplesToBuffer = namedarraytuple("SamplesToBuffer",

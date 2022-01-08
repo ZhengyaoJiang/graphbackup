@@ -3,11 +3,11 @@ import torch
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.nn.parallel import DistributedDataParallelCPU as DDPC
 
-from rlpyt.utils.quick_args import save__init__args
-from rlpyt.utils.collections import namedarraytuple
-from rlpyt.utils.synchronize import RWLock
-from rlpyt.utils.logging import logger
-from rlpyt.models.utils import strip_ddp_state_dict
+from src.rlpyt.rlpyt.utils.quick_args import save__init__args
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.utils.synchronize import RWLock
+from src.rlpyt.rlpyt.utils.logging import logger
+from src.rlpyt.rlpyt.models.utils import strip_ddp_state_dict
 
 AgentInputs = namedarraytuple("AgentInputs",
     ["observation", "prev_action", "prev_reward"])

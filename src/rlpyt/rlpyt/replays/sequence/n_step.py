@@ -2,14 +2,14 @@
 import math
 import numpy as np
 
-from rlpyt.replays.n_step import BaseNStepReturnBuffer
-from rlpyt.utils.buffer import torchify_buffer, buffer_from_example, buffer_func
-from rlpyt.utils.misc import extract_sequences
-from rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.replays.n_step import BaseNStepReturnBuffer
+from src.rlpyt.rlpyt.utils.buffer import torchify_buffer, buffer_from_example, buffer_func
+from src.rlpyt.rlpyt.utils.misc import extract_sequences
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
 
 SamplesFromReplay = namedarraytuple("SamplesFromReplay",
     ["all_observation", "all_action", "all_reward", "all_done", "return_", "done", "done_n",
-    "init_rnn_state"])
+    "init_rnn_state", "state_index"])
 
 SamplesToBuffer = None
 
@@ -97,6 +97,7 @@ class SequenceNStepReturnBuffer(BaseNStepReturnBuffer):
             done=extract_sequences(s.done, T_idxs, B_idxs, T),
             done_n=extract_sequences(self.samples_done_n, T_idxs, B_idxs, T),
             init_rnn_state=init_rnn_state,  # (Same state for agent and target.)
+            state_index=extract_sequences(s.state_index, T_idxs, B_idxs, T)
         )
         # NOTE: Algo might need to make zero prev_action/prev_reward depending on done.
         return torchify_buffer(batch)

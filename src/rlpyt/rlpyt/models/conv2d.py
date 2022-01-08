@@ -1,8 +1,8 @@
 
 import torch
 
-from rlpyt.models.mlp import MlpModel
-from rlpyt.models.utils import conv2d_output_shape
+from src.rlpyt.rlpyt.models.mlp import MlpModel
+from src.rlpyt.rlpyt.models.utils import conv2d_output_shape
 
 
 class Conv2dModel(torch.nn.Module):

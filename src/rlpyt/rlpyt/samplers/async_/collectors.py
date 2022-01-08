@@ -1,7 +1,7 @@
 
-from rlpyt.samplers.parallel.cpu.collectors import (CpuResetCollector,
+from src.rlpyt.rlpyt.samplers.parallel.cpu.collectors import (CpuResetCollector,
     CpuWaitResetCollector)
-from rlpyt.samplers.parallel.gpu.collectors import (GpuResetCollector,
+from src.rlpyt.rlpyt.samplers.parallel.gpu.collectors import (GpuResetCollector,
     GpuWaitResetCollector)
 
 

@@ -1,9 +1,9 @@
 
 import torch
 
-from rlpyt.algos.qpg.ddpg import DDPG
-from rlpyt.utils.quick_args import save__init__args
-from rlpyt.utils.tensor import valid_mean
+from src.rlpyt.rlpyt.algos.qpg.ddpg import DDPG
+from src.rlpyt.rlpyt.utils.quick_args import save__init__args
+from src.rlpyt.rlpyt.utils.tensor import valid_mean
 
 
 class TD3(DDPG):

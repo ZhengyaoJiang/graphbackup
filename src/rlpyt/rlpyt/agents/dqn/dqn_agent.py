@@ -2,13 +2,13 @@
 import torch
 from torch.nn.parallel import DistributedDataParallel as DDP
 
-from rlpyt.agents.base import BaseAgent, AgentStep
-from rlpyt.agents.dqn.epsilon_greedy import EpsilonGreedyAgentMixin
-from rlpyt.distributions.epsilon_greedy import EpsilonGreedy
-from rlpyt.utils.buffer import buffer_to
-from rlpyt.utils.logging import logger
-from rlpyt.utils.collections import namedarraytuple
-from rlpyt.models.utils import update_state_dict
+from src.rlpyt.rlpyt.agents.base import BaseAgent, AgentStep
+from src.rlpyt.rlpyt.agents.dqn.epsilon_greedy import EpsilonGreedyAgentMixin
+from src.rlpyt.rlpyt.distributions.epsilon_greedy import EpsilonGreedy
+from src.rlpyt.rlpyt.utils.buffer import buffer_to
+from src.rlpyt.rlpyt.utils.logging import logger
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.models.utils import update_state_dict
 
 
 AgentInfo = namedarraytuple("AgentInfo", "q")

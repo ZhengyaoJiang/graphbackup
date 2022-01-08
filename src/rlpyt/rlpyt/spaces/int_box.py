@@ -1,7 +1,7 @@
 
 import numpy as np
 
-from rlpyt.spaces.base import Space
+from src.rlpyt.rlpyt.spaces.base import Space
 
 
 class IntBox(Space):

@@ -1,6 +1,6 @@
 
 
-from rlpyt.spaces.base import Space
+from src.rlpyt.rlpyt.spaces.base import Space
 
 
 class Composite(Space):

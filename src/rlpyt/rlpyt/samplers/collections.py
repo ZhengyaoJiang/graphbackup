@@ -1,7 +1,7 @@
 
 from collections import namedtuple
 
-from rlpyt.utils.collections import namedarraytuple, AttrDict
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple, AttrDict
 
 
 Samples = namedarraytuple("Samples", ["agent", "env"])
@@ -11,7 +11,7 @@ AgentSamples = namedarraytuple("AgentSamples",
 AgentSamplesBsv = namedarraytuple("AgentSamplesBsv",
     ["action", "prev_action", "agent_info", "bootstrap_value"])
 EnvSamples = namedarraytuple("EnvSamples",
-    ["observation", "reward", "prev_reward", "done", "env_info"])
+    ["observation", "reward", "prev_reward", "done", "env_info", "state_index"])
 
 
 class BatchSpec(namedtuple("BatchSpec", "T B")):
@@ -45,12 +45,13 @@ class TrajInfo(AttrDict):
         self.DiscountedReturn = 0
         self._cur_discount = 1
 
-    def step(self, observation, action, reward, done, agent_info, env_info):
+    def step(self, observation, action, reward, done, agent_info, env_info, state_index):
         self.Length += 1
         self.Return += reward
         self.NonzeroRewards += reward != 0
         self.DiscountedReturn += self._cur_discount * reward
         self._cur_discount *= self._discount
+        self.state_index=state_index
 
     def terminate(self, observation):
         return self

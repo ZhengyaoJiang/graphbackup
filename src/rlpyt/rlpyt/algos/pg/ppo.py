@@ -1,13 +1,13 @@
 
 import torch
 
-from rlpyt.algos.pg.base import PolicyGradientAlgo, OptInfo
-from rlpyt.agents.base import AgentInputs, AgentInputsRnn
-from rlpyt.utils.tensor import valid_mean
-from rlpyt.utils.quick_args import save__init__args
-from rlpyt.utils.buffer import buffer_to, buffer_method
-from rlpyt.utils.collections import namedarraytuple
-from rlpyt.utils.misc import iterate_mb_idxs
+from src.rlpyt.rlpyt.algos.pg.base import PolicyGradientAlgo, OptInfo
+from src.rlpyt.rlpyt.agents.base import AgentInputs, AgentInputsRnn
+from src.rlpyt.rlpyt.utils.tensor import valid_mean
+from src.rlpyt.rlpyt.utils.quick_args import save__init__args
+from src.rlpyt.rlpyt.utils.buffer import buffer_to, buffer_method
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.utils.misc import iterate_mb_idxs
 
 LossInputs = namedarraytuple("LossInputs",
     ["agent_inputs", "action", "return_", "advantage", "valid", "old_dist_info"])

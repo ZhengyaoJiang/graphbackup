@@ -1,12 +1,12 @@
-from rlpyt.samplers.base import BaseSampler
-from rlpyt.samplers.buffer import build_samples_buffer
-from rlpyt.samplers.parallel.cpu.collectors import CpuResetCollector
+from src.rlpyt.rlpyt.samplers.base import BaseSampler
+from src.rlpyt.rlpyt.samplers.buffer import build_samples_buffer
+from src.rlpyt.rlpyt.samplers.parallel.cpu.collectors import CpuResetCollector
 from src.rlpyt.rlpyt.samplers.serial.collectors import SerialEvalCollector
-from rlpyt.utils.buffer import buffer_from_example, torchify_buffer, numpify_buffer
-from rlpyt.utils.logging import logger
-from rlpyt.utils.quick_args import save__init__args
-from rlpyt.utils.seed import set_seed
-from rlpyt.runners.minibatch_rl import MinibatchRlEval
+from src.rlpyt.rlpyt.utils.buffer import buffer_from_example, torchify_buffer, numpify_buffer
+from src.rlpyt.rlpyt.utils.logging import logger
+from src.rlpyt.rlpyt.utils.quick_args import save__init__args
+from src.rlpyt.rlpyt.utils.seed import set_seed
+from src.rlpyt.rlpyt.runners.minibatch_rl import MinibatchRlEval
 from src.gbsampler import CpuResetGraphCollector
 import pandas as pd
 
@@ -268,7 +268,7 @@ class OneToOneSerialEvalCollector(SerialEvalCollector):
                 #    self.envs[env_id].render()
                 traj_infos[env_id].step(observation[b],
                                         action[b], r, d,
-                                        agent_info[b], env_info)
+                                        agent_info[b], env_info, 0)
                 if getattr(env_info, "traj_done", d):
                     completed_traj_infos.append(traj_infos[env_id].terminate(o))
 
@@ -371,13 +371,17 @@ class SerialSampler(BaseSampler):
         collector.start_agent()
 
         self.agent = agent
-        self.samples_pyt = samples_pyt
+        self._samples_pyt = samples_pyt
         self.samples_np = samples_np
         self.collector = collector
         self.agent_inputs = agent_inputs
         self.traj_infos = traj_infos
         logger.log("Serial Sampler initialized.")
         return examples
+
+    @property
+    def samples_pyt(self):
+        return self._samples_pyt
 
     def obtain_samples(self, itr):
         """Call the collector to execute a batch of agent-environment interactions.
@@ -390,7 +394,7 @@ class SerialSampler(BaseSampler):
         self.collector.reset_if_needed(agent_inputs)
         self.agent_inputs = agent_inputs
         self.traj_infos = traj_infos
-        return self.samples_pyt, completed_infos
+        return self._samples_pyt, completed_infos
 
     def evaluate_agent(self, itr):
         """Call the evaluation collector to execute agent-environment interactions."""

@@ -2,8 +2,8 @@
 import numpy as np
 from gym.spaces.dict import Dict as GymDict
 
-from rlpyt.utils.collections import NamedTupleSchema, NamedTuple
-from rlpyt.spaces.composite import Composite
+from src.rlpyt.rlpyt.utils.collections import NamedTupleSchema, NamedTuple
+from src.rlpyt.rlpyt.spaces.composite import Composite
 
 
 class GymSpaceWrapper:

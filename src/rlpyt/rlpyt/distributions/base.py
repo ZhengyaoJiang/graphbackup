@@ -1,7 +1,7 @@
 
 import torch
 
-from rlpyt.utils.tensor import valid_mean
+from src.rlpyt.rlpyt.utils.tensor import valid_mean
 
 DistInfo = None
 
