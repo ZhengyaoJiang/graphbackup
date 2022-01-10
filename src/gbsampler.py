@@ -158,6 +158,7 @@ class CpuResetGraphCollector(DecorrelatingStartCollector):
             o_key = self.s2i.append_state(o)
             s1_idx = self.s2i.get_index(o_key)
             self.transition_freq.append(s_idx, action[b], r, d, s1_idx)
+            env_buf.state_index[t] = s_idx
             traj_infos[b].step(observation[b], action[b], r, d, agent_info[b],
                                env_info, s_idx)
             s_idx = s1_idx

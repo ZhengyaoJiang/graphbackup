@@ -263,7 +263,8 @@ class SPRCategoricalDQN(CategoricalDQN):
                                        self.gb_collector.s2i, double=self.double_dqn,
                                        dist=self.distributional, discount=self.discount,
                                        breath=self.breath, depth=self.n_step_return,
-                                       one_step_backup=self.one_step_backup)
+                                       one_step_backup=self.one_step_backup,
+                                       source_indexes=samples.state_index[index].cpu().numpy())
             elif self.backup == "graph":
                 target_q = graph_limited_backup(self.agent, self.gb_collector.transition_freq,
                                                 samples.all_observation[index].to(qs.device),
@@ -271,7 +272,8 @@ class SPRCategoricalDQN(CategoricalDQN):
                                                 breath=self.breath, depth=self.n_step_return,
                                                 dist=self.distributional,
                                                 double=self.double_dqn,
-                                                one_step_backup=self.one_step_backup)
+                                                one_step_backup=self.one_step_backup,
+                                                source_indexes=samples.state_index[index].cpu().numpy())
 
                 #disc_target_q = (self.discount ** self.n_step_return) * target_q
                 #y = samples.return_[index] + (1 - samples.done_n[index].float()) * disc_target_q
