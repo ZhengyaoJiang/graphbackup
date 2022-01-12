@@ -206,7 +206,7 @@ def parse_state_portions(tasks, indexes,
     data = {label:[] for label in labels}
     print(tasks)
     for group_n, (index, label) in enumerate(zip(indexes, labels)):
-        data[label+"new_states_portion"] = []
+        data[label+"novel_states_ratio"] = []
         for task_n, task in enumerate(tasks):
             mean_l, std_l = [], []
             portion = []
@@ -245,7 +245,7 @@ def parse_state_portions(tasks, indexes,
     print(df)
 
     fig = plt.figure(figsize=(4.5, 6.0))
-    x = df[label+"new_states_portion"]
+    x = df[label+"novel_states_ratio"]
     y = df["relative performance"]
     plt.scatter(x, y)
     for i, txt in enumerate(df.index.values):
