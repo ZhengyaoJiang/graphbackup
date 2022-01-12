@@ -244,7 +244,7 @@ def parse_state_portions(tasks, indexes,
     print(df)
 
     fig = plt.figure(figsize=(6.0, 4.5))
-    plt.gcf().subplots_adjust(bottom=0.17, left=0.15, right=0.19)
+    plt.gcf().subplots_adjust(bottom=0.17, left=0.15)
     x = df[label+"novel_states_ratio"]
     y = df["relative performance"]
     plt.scatter(x, y)
