@@ -240,9 +240,6 @@ def parse_state_portions(tasks, indexes,
     df = df.loc[df["relative performance"]>0.0]
     mean, median = df.mean(), df.median()
     print(f"correlation coefficients is {np.corrcoef(df['relative performance'], df[label+'novel_states_ratio'])}")
-    df.loc["mean"] = mean
-    df.loc["median"] = median
-    print(df)
 
     fig = plt.figure(figsize=(6.0, 4.5))
     plt.gcf().subplots_adjust(bottom=0.17, left=0.15)
@@ -261,6 +258,10 @@ def parse_state_portions(tasks, indexes,
         name = os.path.expanduser(os.path.join(dir, name))
     Path(os.path.dirname(name)).mkdir(parents=True, exist_ok=True)
     plt.savefig(name)
+
+    df.loc["mean"] = mean
+    df.loc["median"] = median
+    print(df)
 
 
 def plot_graph(task, index, dir, label="", name="graph"):
