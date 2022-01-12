@@ -248,7 +248,7 @@ def parse_state_portions(tasks, indexes,
     y = df["relative performance"]
     plt.scatter(x, y)
     for i, txt in enumerate(df.index.values):
-        plt.annotate(txt, x[i], y[i])
+        plt.annotate(txt, (x[i], y[i]))
 
     plt.axhline(1.0, color="r", linestyle="dashed")
     plt.xlabel('novel states ratio')
