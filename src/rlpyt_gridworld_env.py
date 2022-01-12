@@ -66,7 +66,7 @@ class MiniGridEnv(Env):
 
     def step(self, action):
         s, r, d, _ = self.env.step(action)
-        return EnvStep(s["image"].transpose([2, 0, 1])[None, :], r, d, EnvInfo(r, d, None))
+        return EnvStep(s["image"].transpose([2, 0, 1])[None, :], r, d, EnvInfo(r, d))
 
 
 class Actions(IntEnum):
