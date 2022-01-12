@@ -226,23 +226,33 @@ def parse_state_portions(tasks, indexes,
                     std_l.append(last.std())
                 except Exception:
                     print(f"skip {task_id}-{int(code)+task_n}-{round+1}")
-            mean_return = np.mean(mean_l)
+            if summary == "mean":
+                summary_return = np.mean(mean_l)
+            elif summary == "median":
+                summary_return = np.median(mean_l)
             mean_std = np.mean(std_l)
             mean_portion = np.mean(portion)
-            data[label].append(mean_return)
-            data[label+"new_states_portion"].append(mean_portion)
+            data[label].append(summary_return)
+            data[label+"novel_states_ratio"].append(mean_portion)
 
     df = pd.DataFrame(data, index=tasks)
     df["relative performance"] = df[labels[1]] / df[labels[0]]
     df = df.loc[df["relative performance"]>0.0]
     mean, median = df.mean(), df.median()
+    print(f"correlation coefficients is {np.corrcoef(df['relative performance'], df[label+'novel_states_ratio'])}")
     df.loc["mean"] = mean
     df.loc["median"] = median
     print(df)
 
-    plt.scatter(df[label+"new_states_portion"], df["relative performance"])
+    fig = plt.figure(figsize=(4.5, 6.0))
+    x = df[label+"new_states_portion"]
+    y = df["relative performance"]
+    plt.scatter(x, y)
+    for i, txt in enumerate(df.index.values):
+        plt.annotate(x[i], y[i], txt)
+
     plt.axhline(1.0, color="r", linestyle="dashed")
-    plt.xlabel('new states portion')
+    plt.xlabel('novel states ratio')
     plt.ylabel('relative performance')
     if not name:
         name = os.path.expanduser(os.path.join(dir, "".join(indexes)+"states_portion.png"))
