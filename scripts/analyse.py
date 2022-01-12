@@ -243,7 +243,8 @@ def parse_state_portions(tasks, indexes,
     df.loc["median"] = median
     print(df)
 
-    fig = plt.figure(figsize=(4.5, 6.0))
+    fig = plt.figure(figsize=(6.0, 4.5))
+    plt.gcf().subplots_adjust(bottom=0.17, left=0.15, right=0.19)
     x = df[label+"novel_states_ratio"]
     y = df["relative performance"]
     plt.scatter(x, y)
