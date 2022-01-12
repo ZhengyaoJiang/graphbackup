@@ -103,16 +103,17 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
                         returns = (returns-random_scores) / (float(human_scores[task_n])-random_scores) *100
                     else:
                         returns = df["mean_episode_return"].ewm(span=1).mean()
-                    curves[round]=returns
+                    curves[task]=returns
                 except Exception:
                     print(f"skip {task_id}-{int(code) + task_n}-{round + 1}")
-            curvesdf = pd.concat(list(curves.values()), axis=1)
-            curvesdf = curvesdf[curvesdf.index <= steps]
-            if summary == "mean":
-                summary_curve = curvesdf.mean(axis=1)
-            elif summary == "median":
-                summary_curve = curvesdf.median(axis=1)
-            data.append(summary_curve)
+            if len(curves.keys())>0:
+                curvesdf = pd.concat(list(curves.values()), axis=1)
+                curvesdf = curvesdf[curvesdf.index <= steps]
+                if summary == "mean":
+                    summary_curve = curvesdf.mean(axis=1)
+                elif summary == "median":
+                    summary_curve = curvesdf.median(axis=1)
+                data.append(summary_curve)
 
         tasks_df = pd.concat(data, axis=1)
         tasks_summary = tasks_df.mean(axis=1).values.transpose()
@@ -233,7 +234,7 @@ def parse_state_portions(tasks, indexes,
 
     df = pd.DataFrame(data, index=tasks)
     df["relative performance"] = df[labels[1]] / df[labels[0]]
-    #df = df.loc[df[label+"new_states_portion"]>0.1]
+    df = df.loc[df["relative performance"]>0.0]
     mean, median = df.mean(), df.median()
     df.loc["mean"] = mean
     df.loc["median"] = median
