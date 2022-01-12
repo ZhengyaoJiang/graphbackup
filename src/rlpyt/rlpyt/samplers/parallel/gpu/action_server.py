@@ -1,9 +1,9 @@
 
 import numpy as np
 
-from rlpyt.agents.base import AgentInputs
-from rlpyt.utils.synchronize import drain_queue
-from rlpyt.utils.logging import logger
+from src.rlpyt.rlpyt.agents.base import AgentInputs
+from src.rlpyt.rlpyt.utils.synchronize import drain_queue
+from src.rlpyt.rlpyt.utils.logging import logger
 
 
 EVAL_TRAJ_CHECK = 20  # [steps].

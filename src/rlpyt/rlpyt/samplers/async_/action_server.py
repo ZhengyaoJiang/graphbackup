@@ -1,9 +1,9 @@
 
 import numpy as np
 
-from rlpyt.samplers.parallel.gpu.action_server import (ActionServer,
+from src.rlpyt.rlpyt.samplers.parallel.gpu.action_server import (ActionServer,
     AlternatingActionServer, NoOverlapAlternatingActionServer)
-from rlpyt.agents.base import AgentInputs
+from src.rlpyt.rlpyt.agents.base import AgentInputs
 
 
 class AsyncActionServer(ActionServer):

@@ -1,11 +1,11 @@
 
 import torch
 
-from rlpyt.agents.base import (AgentStep, RecurrentAgentMixin, 
+from src.rlpyt.rlpyt.agents.base import (AgentStep, RecurrentAgentMixin, 
     AlternatingRecurrentAgentMixin)
-from rlpyt.agents.dqn.dqn_agent import DqnAgent
-from rlpyt.utils.buffer import buffer_to, buffer_func, buffer_method
-from rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.agents.dqn.dqn_agent import DqnAgent
+from src.rlpyt.rlpyt.utils.buffer import buffer_to, buffer_func, buffer_method
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
 
 
 AgentInfo = namedarraytuple("AgentInfo", ["q", "prev_rnn_state"])

@@ -2,9 +2,9 @@
 import multiprocessing as mp
 import numpy as np
 
-from rlpyt.utils.buffer import buffer_from_example, torchify_buffer
-from rlpyt.agents.base import AgentInputs
-from rlpyt.samplers.collections import (Samples, AgentSamples, AgentSamplesBsv,
+from src.rlpyt.rlpyt.utils.buffer import buffer_from_example, torchify_buffer
+from src.rlpyt.rlpyt.agents.base import AgentInputs
+from src.rlpyt.rlpyt.samplers.collections import (Samples, AgentSamples, AgentSamplesBsv,
     EnvSamples)
 
 
@@ -44,6 +44,7 @@ def build_samples_buffer(agent, env, batch_spec, bootstrap_value=False,
     reward = all_reward[1:]
     prev_reward = all_reward[:-1]  # Writing to reward will populate prev_reward.
     done = buffer_from_example(examples["done"], (T, B), env_shared)
+    state_index = buffer_from_example(examples["state_index"], (T, B), env_shared)
     env_info = buffer_from_example(examples["env_info"], (T, B), env_shared)
     env_buffer = EnvSamples(
         observation=observation,
@@ -51,6 +52,7 @@ def build_samples_buffer(agent, env, batch_spec, bootstrap_value=False,
         prev_reward=prev_reward,
         done=done,
         env_info=env_info,
+        state_index=state_index
     )
     samples_np = Samples(agent=agent_buffer, env=env_buffer)
     samples_pyt = torchify_buffer(samples_np)
@@ -79,3 +81,4 @@ def get_example_outputs(agent, env, examples, subprocess=False):
     examples["env_info"] = env_info
     examples["action"] = a  # OK to put torch tensor here, could numpify.
     examples["agent_info"] = agent_info
+    examples["state_index"] = 0

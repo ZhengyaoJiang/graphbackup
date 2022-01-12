@@ -1,17 +1,17 @@
 
 import sys
 
-from rlpyt.utils.launching.affinity import affinity_from_code
-from rlpyt.samplers.parallel.gpu.sampler import GpuSampler
-from rlpyt.samplers.parallel.gpu.collectors import GpuWaitResetCollector
-from rlpyt.envs.atari.atari_env import AtariEnv, AtariTrajInfo
-from rlpyt.algos.dqn.dqn import DQN
-from rlpyt.agents.dqn.atari.atari_dqn_agent import AtariDqnAgent
-from rlpyt.runners.minibatch_rl import MinibatchRlEval
-from rlpyt.utils.logging.context import logger_context
-from rlpyt.utils.launching.variant import load_variant, update_config
+from src.rlpyt.rlpyt.utils.launching.affinity import affinity_from_code
+from src.rlpyt.rlpyt.samplers.parallel.gpu.sampler import GpuSampler
+from src.rlpyt.rlpyt.samplers.parallel.gpu.collectors import GpuWaitResetCollector
+from src.rlpyt.rlpyt.envs.atari.atari_env import AtariEnv, AtariTrajInfo
+from src.rlpyt.rlpyt.algos.dqn.dqn import DQN
+from src.rlpyt.rlpyt.agents.dqn.atari.atari_dqn_agent import AtariDqnAgent
+from src.rlpyt.rlpyt.runners.minibatch_rl import MinibatchRlEval
+from src.rlpyt.rlpyt.utils.logging.context import logger_context
+from src.rlpyt.rlpyt.utils.launching.variant import load_variant, update_config
 
-from rlpyt.experiments.configs.atari.dqn.atari_dqn import configs
+from src.rlpyt.rlpyt.experiments.configs.atari.dqn.atari_dqn import configs
 
 
 def build_and_train(slot_affinity_code, log_dir, run_ID, config_key):

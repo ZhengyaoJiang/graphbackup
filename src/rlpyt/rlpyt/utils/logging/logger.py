@@ -1,8 +1,8 @@
 from enum import Enum
 
-from rlpyt.utils.logging.tabulate import tabulate
-from rlpyt.utils.logging.console import mkdir_p, colorize
-from rlpyt.utils.logging.autoargs import get_all_parameters
+from src.rlpyt.rlpyt.utils.logging.tabulate import tabulate
+from src.rlpyt.rlpyt.utils.logging.console import mkdir_p, colorize
+from src.rlpyt.rlpyt.utils.logging.autoargs import get_all_parameters
 from contextlib import contextmanager
 import numpy as np
 import os

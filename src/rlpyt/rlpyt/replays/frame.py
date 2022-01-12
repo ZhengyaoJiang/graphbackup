@@ -1,8 +1,8 @@
 
 
-from rlpyt.utils.buffer import buffer_from_example, get_leading_dims
-from rlpyt.utils.collections import namedarraytuple
-from rlpyt.utils.logging import logger
+from src.rlpyt.rlpyt.utils.buffer import buffer_from_example, get_leading_dims
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.utils.logging import logger
 
 BufferSamples = None
 

@@ -2,12 +2,12 @@
 import psutil
 import torch
 
-from rlpyt.samplers.base import BaseSampler
-from rlpyt.samplers.async_.base import AsyncSamplerMixin
-from rlpyt.samplers.serial.collectors import SerialEvalCollector
-from rlpyt.samplers.async_.collectors import DbCpuResetCollector
-from rlpyt.utils.logging import logger
-from rlpyt.utils.collections import AttrDict
+from src.rlpyt.rlpyt.samplers.base import BaseSampler
+from src.rlpyt.rlpyt.samplers.async_.base import AsyncSamplerMixin
+from src.rlpyt.rlpyt.samplers.serial.collectors import SerialEvalCollector
+from src.rlpyt.rlpyt.samplers.async_.collectors import DbCpuResetCollector
+from src.rlpyt.rlpyt.utils.logging import logger
+from src.rlpyt.rlpyt.utils.collections import AttrDict
 
 
 class AsyncSerialSampler(AsyncSamplerMixin, BaseSampler):

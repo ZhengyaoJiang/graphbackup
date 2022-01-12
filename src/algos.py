@@ -2,12 +2,12 @@ import torch
 import numpy as np
 from pympler import asizeof, classtracker, tracker
 
-from rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
 from collections import namedtuple
-from rlpyt.algos.dqn.cat_dqn import CategoricalDQN
-from rlpyt.utils.tensor import select_at_indexes, valid_mean
-from rlpyt.algos.utils import valid_from_done
-from rlpyt.utils.logging import logger
+from src.rlpyt.rlpyt.algos.dqn.cat_dqn import CategoricalDQN
+from src.rlpyt.rlpyt.utils.tensor import select_at_indexes, valid_mean
+from src.rlpyt.rlpyt.algos.utils import valid_from_done
+from src.rlpyt.rlpyt.utils.logging import logger
 from src.rlpyt_buffer import AsyncPrioritizedSequenceReplayFrameBufferExtended, \
     AsyncUniformSequenceReplayFrameBufferExtended
 from src.models import from_categorical, to_categorical
@@ -18,7 +18,7 @@ from functools import partial
 SamplesToBuffer = namedarraytuple("SamplesToBuffer",
     ["observation", "action", "reward", "done"])
 ModelSamplesToBuffer = namedarraytuple("SamplesToBuffer",
-    ["observation", "action", "reward", "done", "value"])
+    ["observation", "action", "reward", "done", "value", "state_index"])
 
 OptInfo = namedtuple("OptInfo", ["loss", "gradNorm", "tdAbsErr"])
 ModelOptInfo = namedtuple("OptInfo", ["loss", "gradNorm",
@@ -81,6 +81,7 @@ class SPRCategoricalDQN(CategoricalDQN):
             reward=examples["reward"],
             done=examples["done"],
             value=examples["agent_info"].p,
+            state_index=examples["state_index"]
         )
         replay_kwargs = dict(
             example=example_to_buffer,
@@ -136,6 +137,7 @@ class SPRCategoricalDQN(CategoricalDQN):
             reward=samples.env.reward,
             done=samples.env.done,
             value=samples.agent.agent_info.p,
+            state_index=samples.env.state_index
         )
 
     def optimize_agent(self, itr, samples=None, sampler_itr=None):
@@ -261,7 +263,8 @@ class SPRCategoricalDQN(CategoricalDQN):
                                        self.gb_collector.s2i, double=self.double_dqn,
                                        dist=self.distributional, discount=self.discount,
                                        breath=self.breath, depth=self.n_step_return,
-                                       one_step_backup=self.one_step_backup)
+                                       one_step_backup=self.one_step_backup,
+                                       source_indexes=samples.state_index[index].cpu().numpy())
             elif self.backup == "graph":
                 target_q = graph_limited_backup(self.agent, self.gb_collector.transition_freq,
                                                 samples.all_observation[index].to(qs.device),
@@ -269,7 +272,8 @@ class SPRCategoricalDQN(CategoricalDQN):
                                                 breath=self.breath, depth=self.n_step_return,
                                                 dist=self.distributional,
                                                 double=self.double_dqn,
-                                                one_step_backup=self.one_step_backup)
+                                                one_step_backup=self.one_step_backup,
+                                                source_indexes=samples.state_index[index].cpu().numpy())
 
                 #disc_target_q = (self.discount ** self.n_step_return) * target_q
                 #y = samples.return_[index] + (1 - samples.done_n[index].float()) * disc_target_q

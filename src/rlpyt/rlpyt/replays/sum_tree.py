@@ -2,7 +2,7 @@
 import numpy as np
 import multiprocessing as mp
 
-from rlpyt.utils.buffer import np_mp_array
+from src.rlpyt.rlpyt.utils.buffer import np_mp_array
 
 
 class SumTree:

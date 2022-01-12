@@ -1,9 +1,9 @@
 
-from rlpyt.samplers.base import BaseSampler
-from rlpyt.samplers.buffer import build_samples_buffer
-from rlpyt.utils.logging import logger
-from rlpyt.samplers.parallel.cpu.collectors import CpuResetCollector
-from rlpyt.samplers.serial.collectors import SerialEvalCollector
+from src.rlpyt.rlpyt.samplers.base import BaseSampler
+from src.rlpyt.rlpyt.samplers.buffer import build_samples_buffer
+from src.rlpyt.rlpyt.utils.logging import logger
+from src.rlpyt.rlpyt.samplers.parallel.cpu.collectors import CpuResetCollector
+from src.rlpyt.rlpyt.samplers.serial.collectors import SerialEvalCollector
 
 
 class SerialSampler(BaseSampler):
@@ -78,13 +78,17 @@ class SerialSampler(BaseSampler):
         collector.start_agent()
 
         self.agent = agent
-        self.samples_pyt = samples_pyt
+        self.__samples_pyt = samples_pyt
         self.samples_np = samples_np
         self.collector = collector
         self.agent_inputs = agent_inputs
         self.traj_infos = traj_infos
         logger.log("Serial Sampler initialized.")
         return examples
+
+    @property
+    def samples_pyt(self):
+        return self.__samples_pyt
 
     def obtain_samples(self, itr):
         """Call the collector to execute a batch of agent-environment interactions.
@@ -97,7 +101,7 @@ class SerialSampler(BaseSampler):
         self.collector.reset_if_needed(agent_inputs)
         self.agent_inputs = agent_inputs
         self.traj_infos = traj_infos
-        return self.samples_pyt, completed_infos
+        return self.__samples_pyt, completed_infos
 
     def evaluate_agent(self, itr):
         """Call the evaluation collector to execute agent-environment interactions."""

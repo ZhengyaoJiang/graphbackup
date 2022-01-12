@@ -8,7 +8,7 @@ try:
 except ImportError:
     print("Unable to import tensorboard SummaryWriter, proceeding without.")
 
-from rlpyt.utils.logging import logger
+from src.rlpyt.rlpyt.utils.logging import logger
 
 LOG_DIR = osp.abspath(osp.join(osp.dirname(__file__), '../../../data'))
 

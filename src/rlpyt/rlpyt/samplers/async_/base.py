@@ -1,9 +1,9 @@
 
 import multiprocessing as mp
 
-from rlpyt.utils.seed import make_seed
-from rlpyt.samplers.buffer import build_samples_buffer
-from rlpyt.utils.synchronize import drain_queue
+from src.rlpyt.rlpyt.utils.seed import make_seed
+from src.rlpyt.rlpyt.samplers.buffer import build_samples_buffer
+from src.rlpyt.rlpyt.utils.synchronize import drain_queue
 
 
 class AsyncSamplerMixin:

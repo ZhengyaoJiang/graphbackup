@@ -4,7 +4,7 @@ from gym_minigrid.minigrid import COLOR_TO_IDX, OBJECT_TO_IDX, STATE_TO_IDX, DIR
 from gym_minigrid.minigrid import *
 from minatar import Environment
 import gym
-from rlpyt.spaces.int_box import IntBox
+from src.rlpyt.rlpyt.spaces.int_box import IntBox
 from gym.utils import seeding
 from gym import register
 import numpy as np
@@ -15,8 +15,8 @@ from gym import error, spaces, utils
 import itertools as itt
 import gym
 import numpy as np
-from rlpyt.envs.base import Env, EnvStep
-from rlpyt.samplers.collections import TrajInfo
+from src.rlpyt.rlpyt.envs.base import Env, EnvStep
+from src.rlpyt.rlpyt.samplers.collections import TrajInfo
 
 EnvInfo = namedtuple("EnvInfo", ["game_score", "traj_done"])
 

@@ -1,5 +1,5 @@
 
-from rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
 
 AgentInfo = namedarraytuple("AgentInfo", ["dist_info", "value"])
 AgentInfoRnn = namedarraytuple("AgentInfoRnn",

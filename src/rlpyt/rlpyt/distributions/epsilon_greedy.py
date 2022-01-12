@@ -1,8 +1,8 @@
 
 import torch
 
-from rlpyt.distributions.base import Distribution
-from rlpyt.distributions.discrete import DiscreteMixin
+from src.rlpyt.rlpyt.distributions.base import Distribution
+from src.rlpyt.rlpyt.distributions.discrete import DiscreteMixin
 
 
 class EpsilonGreedy(DiscreteMixin, Distribution):

@@ -2,16 +2,16 @@
 import torch
 from collections import namedtuple
 
-from rlpyt.algos.base import RlAlgorithm
-from rlpyt.utils.quick_args import save__init__args
-from rlpyt.utils.logging import logger
-from rlpyt.replays.non_sequence.uniform import (UniformReplayBuffer,
+from src.rlpyt.rlpyt.algos.base import RlAlgorithm
+from src.rlpyt.rlpyt.utils.quick_args import save__init__args
+from src.rlpyt.rlpyt.utils.logging import logger
+from src.rlpyt.rlpyt.replays.non_sequence.uniform import (UniformReplayBuffer,
     AsyncUniformReplayBuffer)
-from rlpyt.replays.non_sequence.time_limit import (TlUniformReplayBuffer,
+from src.rlpyt.rlpyt.replays.non_sequence.time_limit import (TlUniformReplayBuffer,
     AsyncTlUniformReplayBuffer)
-from rlpyt.utils.collections import namedarraytuple
-from rlpyt.utils.tensor import valid_mean
-from rlpyt.algos.utils import valid_from_done
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.utils.tensor import valid_mean
+from src.rlpyt.rlpyt.algos.utils import valid_from_done
 
 OptInfo = namedtuple("OptInfo",
     ["muLoss", "qLoss", "muGradNorm", "qGradNorm"])

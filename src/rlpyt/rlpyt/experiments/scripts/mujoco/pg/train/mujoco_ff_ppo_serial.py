@@ -1,17 +1,17 @@
 
 import sys
 
-from rlpyt.utils.launching.affinity import affinity_from_code
-from rlpyt.samplers.serial.sampler import SerialSampler
-from rlpyt.samplers.parallel.cpu.collectors import CpuResetCollector
-from rlpyt.envs.gym import make as gym_make
-from rlpyt.algos.pg.ppo import PPO
-from rlpyt.agents.pg.mujoco import MujocoFfAgent
-from rlpyt.runners.minibatch_rl import MinibatchRl
-from rlpyt.utils.logging.context import logger_context
-from rlpyt.utils.launching.variant import load_variant, update_config
+from src.rlpyt.rlpyt.utils.launching.affinity import affinity_from_code
+from src.rlpyt.rlpyt.samplers.serial.sampler import SerialSampler
+from src.rlpyt.rlpyt.samplers.parallel.cpu.collectors import CpuResetCollector
+from src.rlpyt.rlpyt.envs.gym import make as gym_make
+from src.rlpyt.rlpyt.algos.pg.ppo import PPO
+from src.rlpyt.rlpyt.agents.pg.mujoco import MujocoFfAgent
+from src.rlpyt.rlpyt.runners.minibatch_rl import MinibatchRl
+from src.rlpyt.rlpyt.utils.logging.context import logger_context
+from src.rlpyt.rlpyt.utils.launching.variant import load_variant, update_config
 
-from rlpyt.experiments.configs.mujoco.pg.mujoco_ppo import configs
+from src.rlpyt.rlpyt.experiments.configs.mujoco.pg.mujoco_ppo import configs
 
 
 def build_and_train(slot_affinity_code, log_dir, run_ID, config_key):

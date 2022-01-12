@@ -5,14 +5,14 @@ from collections import namedtuple
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.nn.parallel import DistributedDataParallelCPU as DDPC
 
-from rlpyt.agents.base import BaseAgent, AgentStep
-from rlpyt.models.qpg.mlp import QofMuMlpModel, PiMlpModel
-from rlpyt.utils.quick_args import save__init__args
-from rlpyt.distributions.gaussian import Gaussian, DistInfoStd
-from rlpyt.utils.buffer import buffer_to
-from rlpyt.utils.logging import logger
-from rlpyt.models.utils import update_state_dict
-from rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.agents.base import BaseAgent, AgentStep
+from src.rlpyt.rlpyt.models.qpg.mlp import QofMuMlpModel, PiMlpModel
+from src.rlpyt.rlpyt.utils.quick_args import save__init__args
+from src.rlpyt.rlpyt.distributions.gaussian import Gaussian, DistInfoStd
+from src.rlpyt.rlpyt.utils.buffer import buffer_to
+from src.rlpyt.rlpyt.utils.logging import logger
+from src.rlpyt.rlpyt.models.utils import update_state_dict
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
 
 
 MIN_LOG_STD = -20

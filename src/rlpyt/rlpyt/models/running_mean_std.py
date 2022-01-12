@@ -1,7 +1,7 @@
 
 import torch
 import torch.distributed as dist
-from rlpyt.utils.tensor import infer_leading_dims
+from src.rlpyt.rlpyt.utils.tensor import infer_leading_dims
 
 
 class RunningMeanStdModel(torch.nn.Module):

@@ -2,12 +2,12 @@
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.nn.parallel import DistributedDataParallelCPU as DDPC
 
-from rlpyt.agents.qpg.ddpg_agent import DdpgAgent
-from rlpyt.utils.buffer import buffer_to
-from rlpyt.distributions.gaussian import Gaussian, DistInfo
-from rlpyt.models.utils import update_state_dict
-from rlpyt.utils.quick_args import save__init__args
-from rlpyt.utils.logging import logger
+from src.rlpyt.rlpyt.agents.qpg.ddpg_agent import DdpgAgent
+from src.rlpyt.rlpyt.utils.buffer import buffer_to
+from src.rlpyt.rlpyt.distributions.gaussian import Gaussian, DistInfo
+from src.rlpyt.rlpyt.models.utils import update_state_dict
+from src.rlpyt.rlpyt.utils.quick_args import save__init__args
+from src.rlpyt.rlpyt.utils.logging import logger
 
 
 class Td3Agent(DdpgAgent):

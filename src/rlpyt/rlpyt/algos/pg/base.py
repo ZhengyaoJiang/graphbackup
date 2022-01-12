@@ -2,8 +2,8 @@
 # import torch
 from collections import namedtuple
 
-from rlpyt.algos.base import RlAlgorithm
-from rlpyt.algos.utils import (discount_return, generalized_advantage_estimation,
+from src.rlpyt.rlpyt.algos.base import RlAlgorithm
+from src.rlpyt.rlpyt.algos.utils import (discount_return, generalized_advantage_estimation,
     valid_from_done)
 
 # Convention: traj_info fields CamelCase, opt_info fields lowerCamelCase

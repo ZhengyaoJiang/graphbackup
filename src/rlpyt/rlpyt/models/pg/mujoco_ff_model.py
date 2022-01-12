@@ -2,9 +2,9 @@
 import numpy as np
 import torch
 
-from rlpyt.utils.tensor import infer_leading_dims, restore_leading_dims
-from rlpyt.models.mlp import MlpModel
-from rlpyt.models.running_mean_std import RunningMeanStdModel
+from src.rlpyt.rlpyt.utils.tensor import infer_leading_dims, restore_leading_dims
+from src.rlpyt.rlpyt.models.mlp import MlpModel
+from src.rlpyt.rlpyt.models.running_mean_std import RunningMeanStdModel
 
 
 class MujocoFfModel(torch.nn.Module):

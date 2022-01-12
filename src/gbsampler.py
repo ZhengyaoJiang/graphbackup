@@ -44,9 +44,6 @@ class State2Index:
         else:
             return None
 
-    def get_indexes(self, states):
-        return [self.get_index(state) for state in states]
-
     def get_states(self, indexs):
         return [self.states[i] for i in indexs]
 
@@ -161,10 +158,11 @@ class CpuResetGraphCollector(DecorrelatingStartCollector):
             o_key = self.s2i.append_state(o)
             s1_idx = self.s2i.get_index(o_key)
             self.transition_freq.append(s_idx, action[b], r, d, s1_idx)
+            env_buf.state_index[t] = s_idx
+            traj_infos[b].step(observation[b], action[b], r, d, agent_info[b],
+                               env_info, s_idx)
             s_idx = s1_idx
 
-            traj_infos[b].step(observation[b], action[b], r, d, agent_info[b],
-                env_info)
             if getattr(env_info, "traj_done", d):
                 completed_infos.append(traj_infos[b].terminate(o))
                 traj_infos[b] = self.TrajInfoCls()
@@ -199,13 +197,12 @@ def q2v(q, policy="greedy", epsilon=0.02):
     elif policy == "epsilon_greedy":
         return np.max(q)*(1-epsilon) + np.sum(epsilon/torch.sum(q.shape)*q)
 
-def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, double, dist, one_step_backup):
+def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, double, dist, one_step_backup, source_indexes):
     targets = []
-    source_idxes = s2i.get_indexes(states)
     sa_all = []
     target_states = []
 
-    for source_idx in source_idxes:
+    for source_idx in source_indexes:
         new_s = {source_idx}
         sa = []
         target_states.append(source_idx)
@@ -263,13 +260,12 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, doub
 
 
 def graph_mixed_backup(agent, freq, states, actions, s2i, discount, breath,
-                       depth, double, dist, one_step_backup):
-    source_idxes = s2i.get_indexes(states)
+                       depth, double, dist, one_step_backup, source_indexes):
     targets = []
     sa_all = []
     target_states = []
 
-    for n, source_idx in enumerate(source_idxes):
+    for n, source_idx in enumerate(source_indexes):
         new_s = {source_idx}
         #sa = [(source_idx, actions[n])]
         sa = []

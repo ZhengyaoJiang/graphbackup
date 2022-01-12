@@ -1,11 +1,11 @@
 
 import torch
 
-from rlpyt.utils.tensor import infer_leading_dims, restore_leading_dims
-from rlpyt.utils.collections import namedarraytuple
-from rlpyt.models.conv2d import Conv2dHeadModel
-from rlpyt.models.mlp import MlpModel
-from rlpyt.models.dqn.dueling import DuelingHeadModel
+from src.rlpyt.rlpyt.utils.tensor import infer_leading_dims, restore_leading_dims
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.models.conv2d import Conv2dHeadModel
+from src.rlpyt.rlpyt.models.mlp import MlpModel
+from src.rlpyt.rlpyt.models.dqn.dueling import DuelingHeadModel
 
 
 RnnState = namedarraytuple("RnnState", ["h", "c"])

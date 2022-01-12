@@ -1,4 +1,4 @@
-from rlpyt.experiments.configs.atari.dqn.atari_dqn import configs
+from src.rlpyt.rlpyt.experiments.configs.atari.dqn.atari_dqn import configs
 
 
 def count_parameters(model):

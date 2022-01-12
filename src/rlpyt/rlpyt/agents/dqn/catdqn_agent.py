@@ -1,11 +1,11 @@
 
 import torch
 
-from rlpyt.agents.base import AgentStep
-from rlpyt.agents.dqn.dqn_agent import DqnAgent
-from rlpyt.distributions.epsilon_greedy import CategoricalEpsilonGreedy
-from rlpyt.utils.buffer import buffer_to
-from rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.agents.base import AgentStep
+from src.rlpyt.rlpyt.agents.dqn.dqn_agent import DqnAgent
+from src.rlpyt.rlpyt.distributions.epsilon_greedy import CategoricalEpsilonGreedy
+from src.rlpyt.rlpyt.utils.buffer import buffer_to
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
 
 AgentInfo = namedarraytuple("AgentInfo", ["p"])
 

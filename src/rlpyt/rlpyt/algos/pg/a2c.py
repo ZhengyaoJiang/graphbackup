@@ -1,12 +1,12 @@
 
 import torch
 
-from rlpyt.algos.pg.base import PolicyGradientAlgo, OptInfo
-from rlpyt.agents.base import AgentInputs
+from src.rlpyt.rlpyt.algos.pg.base import PolicyGradientAlgo, OptInfo
+from src.rlpyt.rlpyt.agents.base import AgentInputs
 
-from rlpyt.utils.tensor import valid_mean
-from rlpyt.utils.quick_args import save__init__args
-from rlpyt.utils.buffer import buffer_method
+from src.rlpyt.rlpyt.utils.tensor import valid_mean
+from src.rlpyt.rlpyt.utils.quick_args import save__init__args
+from src.rlpyt.rlpyt.utils.buffer import buffer_method
 
 
 class A2C(PolicyGradientAlgo):

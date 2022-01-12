@@ -74,7 +74,7 @@ def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, 
 
 
 def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, human_scores,
-                   format="text", base_scores=0, task_masks=None):
+                   format="text", base_scores=0, task_masks=None, log_freq=10000):
     fig = plt.figure(figsize=(3.1, 3.0))
     plt.rc('font', family='serif')
     plt.rc('xtick', labelsize='x-small')
@@ -93,6 +93,7 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
                 task_id, code = index.split("-")
                 try:
                     df = pd.read_csv(os.path.join(dir, f"{task_id}-{int(code)+task_n}-{round+1}", "logs.csv"), index_col="step")
+                    df = df[df.index % log_freq == 0]
                     if human_scores:
                         returns = df["mean_episode_return"].ewm(span=1).mean()
                         if isinstance(base_scores, list):

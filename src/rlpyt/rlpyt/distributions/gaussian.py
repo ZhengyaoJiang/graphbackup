@@ -2,9 +2,9 @@
 import torch
 import math
 
-from rlpyt.distributions.base import Distribution
-from rlpyt.utils.collections import namedarraytuple
-from rlpyt.utils.tensor import valid_mean
+from src.rlpyt.rlpyt.distributions.base import Distribution
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple
+from src.rlpyt.rlpyt.utils.tensor import valid_mean
 
 EPS = 1e-8
 

@@ -4,9 +4,9 @@ import gym
 from gym import Wrapper
 from gym.wrappers.time_limit import TimeLimit
 
-from rlpyt.envs.base import EnvSpaces, EnvStep
-from rlpyt.spaces.gym_wrapper_schema import GymSpaceWrapper
-from rlpyt.utils.collections import NamedTupleSchema
+from src.rlpyt.rlpyt.envs.base import EnvSpaces, EnvStep
+from src.rlpyt.rlpyt.spaces.gym_wrapper_schema import GymSpaceWrapper
+from src.rlpyt.rlpyt.utils.collections import NamedTupleSchema
 
 
 class GymEnvWrapper(Wrapper):

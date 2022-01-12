@@ -2,7 +2,7 @@
 import multiprocessing as mp
 import ctypes
 
-from rlpyt.utils.synchronize import RWLock
+from src.rlpyt.rlpyt.utils.synchronize import RWLock
 
 
 class AsyncReplayBufferMixin:

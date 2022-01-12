@@ -3,12 +3,12 @@ import time
 import psutil
 import torch
 
-from rlpyt.samplers.async_.base import AsyncParallelSamplerMixin
-from rlpyt.samplers.parallel.base import ParallelSamplerBase
-from rlpyt.samplers.async_.collectors import DbCpuResetCollector
-from rlpyt.samplers.parallel.cpu.collectors import CpuEvalCollector
-from rlpyt.utils.logging import logger
-from rlpyt.utils.synchronize import drain_queue
+from src.rlpyt.rlpyt.samplers.async_.base import AsyncParallelSamplerMixin
+from src.rlpyt.rlpyt.samplers.parallel.base import ParallelSamplerBase
+from src.rlpyt.rlpyt.samplers.async_.collectors import DbCpuResetCollector
+from src.rlpyt.rlpyt.samplers.parallel.cpu.collectors import CpuEvalCollector
+from src.rlpyt.rlpyt.utils.logging import logger
+from src.rlpyt.rlpyt.utils.synchronize import drain_queue
 
 
 EVAL_TRAJ_CHECK = 0.1  # Seconds.

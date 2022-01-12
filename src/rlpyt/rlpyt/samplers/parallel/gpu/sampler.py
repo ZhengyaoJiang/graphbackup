@@ -1,14 +1,14 @@
 
 import multiprocessing as mp
 
-from rlpyt.agents.base import AgentInputs
-from rlpyt.samplers.parallel.base import ParallelSamplerBase
-from rlpyt.samplers.parallel.gpu.action_server import ActionServer
-from rlpyt.samplers.parallel.gpu.collectors import (GpuResetCollector,
+from src.rlpyt.rlpyt.agents.base import AgentInputs
+from src.rlpyt.rlpyt.samplers.parallel.base import ParallelSamplerBase
+from src.rlpyt.rlpyt.samplers.parallel.gpu.action_server import ActionServer
+from src.rlpyt.rlpyt.samplers.parallel.gpu.collectors import (GpuResetCollector,
     GpuEvalCollector)
-from rlpyt.utils.collections import namedarraytuple, AttrDict
-from rlpyt.utils.synchronize import drain_queue
-from rlpyt.utils.buffer import buffer_from_example, torchify_buffer
+from src.rlpyt.rlpyt.utils.collections import namedarraytuple, AttrDict
+from src.rlpyt.rlpyt.utils.synchronize import drain_queue
+from src.rlpyt.rlpyt.utils.buffer import buffer_from_example, torchify_buffer
 
 StepBuffer = namedarraytuple("StepBuffer",
     ["observation", "action", "reward", "done", "agent_info"])

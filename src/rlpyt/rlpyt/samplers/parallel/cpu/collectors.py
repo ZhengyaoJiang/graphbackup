@@ -1,10 +1,10 @@
 
 import numpy as np
 
-from rlpyt.samplers.collectors import (DecorrelatingStartCollector,
+from src.rlpyt.rlpyt.samplers.collectors import (DecorrelatingStartCollector,
     BaseEvalCollector)
-from rlpyt.agents.base import AgentInputs
-from rlpyt.utils.buffer import (torchify_buffer, numpify_buffer, buffer_from_example,
+from src.rlpyt.rlpyt.agents.base import AgentInputs
+from src.rlpyt.rlpyt.utils.buffer import (torchify_buffer, numpify_buffer, buffer_from_example,
     buffer_method)
 
 
