@@ -131,7 +131,7 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
         else:
             name = os.path.expanduser(os.path.join(dir, name))
         Path(os.path.dirname(name)).mkdir(parents=True, exist_ok=True)
-        plt.savefig(name)
+        plt.savefig(name, dpi=1000)
 
 
 def group_plot(indexes, labels, dir, steps, name, repeats=3, summary="mean", baseline=0.0):
@@ -179,7 +179,7 @@ def group_plot(indexes, labels, dir, steps, name, repeats=3, summary="mean", bas
     else:
         name = os.path.expanduser(os.path.join(dir, name))
     Path(os.path.dirname(name)).mkdir(parents=True, exist_ok=True)
-    plt.savefig(name)
+    plt.savefig(name, dpi=1000)
 
 
 def plot_mean_return(index, dir):
@@ -242,6 +242,7 @@ def parse_state_portions(tasks, indexes,
     print(f"correlation coefficients is {np.corrcoef(df['relative performance'], df[label+'novel_states_ratio'])}")
 
     fig = plt.figure(figsize=(6.0, 4.5))
+    plt.rc('font', family='serif')
     plt.gcf().subplots_adjust(bottom=0.17, left=0.15)
     x = df[label+"novel_states_ratio"]
     y = df["relative performance"]
@@ -257,7 +258,7 @@ def parse_state_portions(tasks, indexes,
     else:
         name = os.path.expanduser(os.path.join(dir, name))
     Path(os.path.dirname(name)).mkdir(parents=True, exist_ok=True)
-    plt.savefig(name)
+    plt.savefig(name, dpi=1000)
 
     df.loc["mean"] = mean
     df.loc["median"] = median
