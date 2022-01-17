@@ -47,16 +47,16 @@ def build_and_train(game="pong", run_ID=0, args=None):
         args.imagesize=16
         args.framestack=1
         env = MiniGridEnv
-        env_kwargs = dict(game=game)
-        eval_env_kwargs = dict(game=game)
+        env_kwargs = dict(game=game, seed=args.seed)
+        eval_env_kwargs = dict(game=game, seed=args.seed)
         args.architecture = "gridworld"
         config = set_config(args, game)
     elif "Minatar" in game:
         args.imagesize=10
         args.framestack=1
         env = MinAtarEnv
-        env_kwargs = dict(game=game)
-        eval_env_kwargs = dict(game=game)
+        env_kwargs = dict(game=game, seed=args.seed)
+        eval_env_kwargs = dict(game=game, seed=np.random.randint(256))
         args.architecture = "gridworld"
         config = set_config(args, game)
     else:

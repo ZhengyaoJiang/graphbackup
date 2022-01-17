@@ -45,7 +45,7 @@ class PaddingWrapper(gym.core.ObservationWrapper):
 
 
 class MiniGridEnv(Env):
-    def __init__(self, game, id=0):
+    def __init__(self, game, seed, id=0):
         env = gym.make(game)
         env = ReseedWrapper(env)
         env = FullyObsWrapper(env)
@@ -57,6 +57,7 @@ class MiniGridEnv(Env):
         self._action_space = IntBox(low=0, high=action_shape)
         self._observation_space = IntBox(low=0, high=255, shape=(1, 3, obs_shape[0], obs_shape[1]),
                                          dtype="uint8")
+        self.seed(seed, id)
 
     def seed(self, seed=None, id=0):
         self.env.seed(seed)
@@ -89,7 +90,7 @@ class Spec():
 
 
 class MinAtarEnv(Env):
-    def __init__(self, game, sticky_action_prob=0.1, id=0):
+    def __init__(self, game, seed, sticky_action_prob=0.1, id=0):
         super().__init__()
         self.maximum_steps = 5000
         self.env = Environment(game.replace("Minatar-", ""), sticky_action_prob)
@@ -101,6 +102,7 @@ class MinAtarEnv(Env):
                                          dtype="uint8")
         self.steps = 0
         self.id = id
+        self.seed(seed, id)
 
     def seed(self, seed, id=0):
         _, seed1 = seeding.np_random(seed)
@@ -112,7 +114,7 @@ class MinAtarEnv(Env):
         # 2**31.
         seed2 = seeding.hash_seed(seed1 + 1) % 2**31
 
-        self.env.env.random = np.random.RandomState(seed2)
+        self.env.random.seed(seed2)
 
     def reset(self):
         self.env.reset()
