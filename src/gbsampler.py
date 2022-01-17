@@ -197,12 +197,15 @@ def q2v(q, policy="greedy", epsilon=0.02):
     elif policy == "epsilon_greedy":
         return np.max(q)*(1-epsilon) + np.sum(epsilon/torch.sum(q.shape)*q)
 
-def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, double, dist, one_step_backup, source_indexes):
+def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, double, dist, one_step_backup, source_indexes,
+                         visualize=True):
     targets = []
     sa_all = []
     target_states = []
+    if visualize:
+        g = nx.DiGraph()
 
-    for source_idx in source_indexes:
+    for batch_idx, source_idx in enumerate(source_indexes):
         new_s = {source_idx}
         sa = []
         target_states.append(source_idx)
@@ -224,6 +227,11 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, doub
             else:
                 sa.extend([t[:2] for t in new_trans])
                 new_s = set([t[-1] for t in new_trans])
+
+            if visualize and batch_idx==0:
+                for s, a, r, d, next_state in new_trans:
+                    weight = freq.freq[s][a][(r,d,next_state)]
+                    g.add_edge(s, next_state, action=a, reward=r, done=d, weight=weight)
         sa_all.append((source_idx, sa))
 
     target_states = list(set(target_states))
@@ -251,10 +259,28 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, doub
                 overall_count += count
                 if next_state not in i2q_temp:
                     i2q_temp[next_state] = torch.clone(i2q[next_state])
-                idx = i2max[next_state] if double else torch.zeros(0)
+                idx = i2max[next_state] if double else torch.zeros(0) # 0 means the backup will use argmax index
                 v += count * one_step_backup(i2q_temp[next_state], idx, torch.tensor(r), torch.tensor(d))
             i2q_temp[state][action] = v / overall_count
         targets.append(i2q_temp[source_idx])
+
+    if visualize:
+        pos = nx.nx_agraph.graphviz_layout(g, prog="twopi", root=source_indexes[0])
+        nx.draw(g, pos, with_labels=True, font_weight='bold', arrows=True)
+        plt.show()
+        from mpl_toolkits.axes_grid1 import ImageGrid
+        vis_states = list(g.nodes)
+        fig = plt.figure(1, (1.*int(np.ceil(len(vis_states)/3)), 4.))
+        grid = ImageGrid(fig, 111,
+                         nrows_ncols=(int(np.ceil(len(vis_states)/3)), 3),
+                         axes_pad=0.4,
+                         )
+        for i, state in enumerate(vis_states):
+            grid[i].set_title(vis_states[i], fontdict=None, loc='center', color="k")
+            numerical_state = np.amax(s2i.states[vis_states[i]][0] * np.reshape(np.arange(4) + 1, (1, 1, -1))
+                                      .transpose([2,0,1]), 0) + 0.5
+            grid[i].imshow(numerical_state, interpolation='none')
+        fig.show()
     return torch.stack(targets)
 
 
