@@ -25,7 +25,7 @@ class State2Index:
         self.data = dict()
         self.hashing_method = hashing_method
         self.max = 0
-        self.states = []
+        self.__states = []
         self.last_key = ""
         self.stay_count = 0
 
@@ -44,8 +44,11 @@ class State2Index:
         else:
             return None
 
+    def get_state(self, index):
+        return self.__states[index]
+
     def get_states(self, indexs):
-        return [self.states[i] for i in indexs]
+        return [self.__states[i] for i in indexs]
 
     def append_state(self, state, increase_stay=True):
         if isinstance(state, torch.Tensor):
@@ -63,7 +66,7 @@ class State2Index:
 
         if key not in self.data:
             self.data[key] = len(self.data)
-            self.states.append(state)
+            self.__states.append(state)
             self.max += 1
         return key
 
@@ -141,7 +144,7 @@ class CpuResetGraphCollector(DecorrelatingStartCollector):
         env_buf.prev_reward[0] = reward
         self.agent.sample_mode(itr)
 
-        o_key = self.s2i.append_state(agent_inputs.observation[0], increase_stay=False)
+        o_key = self.s2i.append_state(agent_inputs.observation[0].copy(), increase_stay=False)
         s_idx = self.s2i.get_index(o_key)
 
         for t in range(self.batch_T):
@@ -198,7 +201,7 @@ def q2v(q, policy="greedy", epsilon=0.02):
         return np.max(q)*(1-epsilon) + np.sum(epsilon/torch.sum(q.shape)*q)
 
 def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, double, dist, one_step_backup, source_indexes,
-                         visualize=True):
+                         visualize=False):
     targets = []
     sa_all = []
     target_states = []
@@ -270,14 +273,14 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, doub
         plt.show()
         from mpl_toolkits.axes_grid1 import ImageGrid
         vis_states = list(g.nodes)
-        fig = plt.figure(1, (1.*int(np.ceil(len(vis_states)/3)), 4.))
+        fig = plt.figure(1, (4, 1.*int(np.ceil(len(vis_states)/3))))
         grid = ImageGrid(fig, 111,
                          nrows_ncols=(int(np.ceil(len(vis_states)/3)), 3),
                          axes_pad=0.4,
                          )
         for i, state in enumerate(vis_states):
             grid[i].set_title(vis_states[i], fontdict=None, loc='center', color="k")
-            numerical_state = np.amax(s2i.states[vis_states[i]][0] * np.reshape(np.arange(4) + 1, (1, 1, -1))
+            numerical_state = np.amax(s2i.get_state(vis_states[i])[0] * np.reshape(np.arange(4) + 1, (1, 1, -1))
                                       .transpose([2,0,1]), 0) + 0.5
             grid[i].imshow(numerical_state, interpolation='none')
         fig.show()
