@@ -47,6 +47,8 @@ class SPRCategoricalDQN(CategoricalDQN):
                  backup="graph",
                  collector=None,
                  breath=10,
+                 visualize_local_period=-1,
+                 limit_sample_method="transition_proportional",
                  **kwargs):
         super().__init__(**kwargs)
         self.opt_info_fields = tuple(f for f in ModelOptInfo._fields)  # copy
@@ -63,6 +65,8 @@ class SPRCategoricalDQN(CategoricalDQN):
         self.breath = breath
         self.distributional = distributional
         self.backup = backup
+        self.visualize_local_period = visualize_local_period
+        self.limit_sample_method = limit_sample_method
 
         if backup == "n-step-Q":
             if not distributional:
@@ -266,6 +270,10 @@ class SPRCategoricalDQN(CategoricalDQN):
                                        one_step_backup=self.one_step_backup,
                                        source_indexes=samples.state_index[index].cpu().numpy())
             elif self.backup == "graph":
+                if self.visualize_local_period == -1:
+                    visualize = False
+                else:
+                    visualize = True if self.update_counter % 100 == 0 else False
                 target_q = graph_limited_backup(self.agent, self.gb_collector.transition_freq,
                                                 samples.all_observation[index].to(qs.device),
                                                 self.gb_collector.s2i, discount=self.discount,
@@ -273,7 +281,9 @@ class SPRCategoricalDQN(CategoricalDQN):
                                                 dist=self.distributional,
                                                 double=self.double_dqn,
                                                 one_step_backup=self.one_step_backup,
-                                                source_indexes=samples.state_index[index].cpu().numpy())
+                                                source_indexes=samples.state_index[index].cpu().numpy(),
+                                                visualize=visualize,
+                                                limit_sample_method=self.limit_sample_method)
 
                 #disc_target_q = (self.discount ** self.n_step_return) * target_q
                 #y = samples.return_[index] + (1 - samples.done_n[index].float()) * disc_target_q

@@ -201,7 +201,7 @@ def q2v(q, policy="greedy", epsilon=0.02):
         return np.max(q)*(1-epsilon) + np.sum(epsilon/torch.sum(q.shape)*q)
 
 def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, double, dist, one_step_backup, source_indexes,
-                         visualize=False):
+                         visualize=True, limit_sample_method="transition_proportional"):
     targets = []
     sa_all = []
     target_states = []
@@ -222,8 +222,11 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, doub
             target_states.extend([t[-1] for t in new_trans])
             if len(new_trans) > breath:
                 new_trans = list(new_trans)
-                counts = [freq.freq[t[0]][t[1]][t[2:]] for t in new_trans]
-                prob = counts
+                if limit_sample_method == "transition_proportional":
+                    counts = [freq.freq[t[0]][t[1]][t[2:]] for t in new_trans]
+                    prob = counts
+                elif limit_sample_method == "uniform":
+                    prob = np.ones(len(new_trans))
                 new_trans = choices(new_trans, weights=prob, k=breath)
                 sa.extend([t[:2] for t in new_trans])
                 new_s = set([t[-1] for t in new_trans])
@@ -280,7 +283,7 @@ def graph_limited_backup(agent, freq, states, s2i, discount, breath, depth, doub
                          )
         for i, state in enumerate(vis_states):
             grid[i].set_title(vis_states[i], fontdict=None, loc='center', color="k")
-            numerical_state = np.amax(s2i.get_state(vis_states[i])[0] * np.reshape(np.arange(4) + 1, (1, 1, -1))
+            numerical_state = np.amax(s2i.get_state(vis_states[i])[0] * np.reshape(np.arange(states.shape[2]) + 1, (1, 1, -1))
                                       .transpose([2,0,1]), 0) + 0.5
             grid[i].imshow(numerical_state, interpolation='none')
         fig.show()

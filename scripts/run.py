@@ -81,7 +81,9 @@ def build_and_train(game="pong", run_ID=0, args=None):
         eval_max_trajectories=config["sampler"]["eval_max_trajectories"],
     )
     algo = SPRCategoricalDQN(optim_kwargs=config["optim"], jumps=args.jumps, breath=args.breath,
-                              **config["algo"])  # Run with defaults.
+                             visualize_local_period=args.visualize_local_period,
+                             limit_sample_method=args.limit_sample_method,
+                             **config["algo"])  # Run with defaults.
     agent = SPRAgent(ModelCls=SPRCatDqnModel, model_kwargs=config["model"], **config["agent"])
 
     runner = MinibatchRlEvalWandb(
@@ -176,6 +178,9 @@ if __name__ == "__main__":
     parser.add_argument('--disable_cuda', action='store_true')
     parser.add_argument('--backup', type=str, default='n-step-Q', choices=["n-step-Q", "graph", "graph-mixed", "tree"])
     parser.add_argument('--architecture', type=str, default='spr', choices=["spr", "efficient-zero"])
+    parser.add_argument('--visualize_local_period', type=int, default=-1)
+    parser.add_argument('--limit_sample_method', type=str, default="transition_proportional", choices=["uniform", "transition_proportional"])
+
     args = parser.parse_args()
 
     build_and_train(game=args.game,
