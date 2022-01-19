@@ -259,6 +259,8 @@ class OneToOneSerialEvalCollector(SerialEvalCollector):
         for t in range(self.max_T):
             act_pyt, agent_info = self.agent.step(obs_pyt, act_pyt, rew_pyt)
             action = numpify_buffer(act_pyt)
+            #is_explore = np.random.random(size=action.shape) < 0.001
+            #action = is_explore*np.random.randint(0, self.envs[0].action_space.high) + (1-is_explore)*action
 
             b = 0
             while b < len(live_envs):  # don't want to do a for loop since live envs changes over time

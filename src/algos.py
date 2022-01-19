@@ -273,7 +273,7 @@ class SPRCategoricalDQN(CategoricalDQN):
                 if self.visualize_local_period == -1:
                     visualize = False
                 else:
-                    visualize = True if self.update_counter % 100 == 0 else False
+                    visualize = True if self.update_counter % self.visualize_local_period == 0 else False
                 target_q = graph_limited_backup(self.agent, self.gb_collector.transition_freq,
                                                 samples.all_observation[index].to(qs.device),
                                                 self.gb_collector.s2i, discount=self.discount,
