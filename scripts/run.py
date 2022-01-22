@@ -12,6 +12,8 @@ from src.rlpyt.rlpyt.samplers.serial.sampler import SerialSampler
 from src.rlpyt.rlpyt.envs.atari.atari_env import AtariTrajInfo
 from src.rlpyt.rlpyt.utils.logging.context import logger_context
 from pympler import asizeof, classtracker, tracker
+import os
+from os.path import exists
 
 import torch
 import numpy as np
@@ -65,7 +67,13 @@ def build_and_train(game="pong", run_ID=0, args=None):
         env_kwargs = config["env"]
         eval_env_kwargs = config["eval_env"]
 
-
+    if args.fill_missing:
+        if exists(os.path.expandvars(os.path.expanduser(os.path.join('~/logs/ava', args.exp_id)))):
+            return
+        elif os.stat(os.path.expandvars(os.path.expanduser(os.path.join('~/logs/ava', args.exp_id)))).st_size == 0:
+            return
+        if exists(os.path.expandvars(os.path.expanduser(os.path.join('~/locallogs/ava', args.exp_id)))):
+            return
 
     sampler = SerialSampler(
         EnvCls=env,
@@ -180,6 +188,8 @@ if __name__ == "__main__":
     parser.add_argument('--architecture', type=str, default='spr', choices=["spr", "efficient-zero"])
     parser.add_argument('--visualize_local_period', type=int, default=-1)
     parser.add_argument('--limit_sample_method', type=str, default="transition_proportional", choices=["uniform", "transition_proportional"])
+
+    parser.add_argument('--fill_missing', action='store_true')
 
     args = parser.parse_args()
 

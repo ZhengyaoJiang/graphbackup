@@ -50,7 +50,7 @@ class State2Index:
     def get_states(self, indexs):
         return [self.__states[i] for i in indexs]
 
-    def append_state(self, state, increase_stay=True):
+    def append_state(self, state, increase_stay=False):
         if isinstance(state, torch.Tensor):
             np_state = state.cpu().numpy()
         else:
