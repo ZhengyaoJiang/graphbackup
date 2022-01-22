@@ -80,6 +80,7 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
     plt.rc('xtick', labelsize='x-small')
     plt.rc('ytick', labelsize='x-small')
     plt.gcf().subplots_adjust(bottom=0.17, left=0.19)
+    print(tasks)
     for group_n, (index, label) in enumerate(zip(indexes, labels)):
         data = []
         data_std = []
@@ -103,11 +104,14 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
                         returns = (returns-random_scores) / (float(human_scores[task_n])-random_scores) *100
                     else:
                         returns = df["mean_episode_return"].ewm(span=1).mean()
-                    curves[round]=returns
+                    curves[task]=returns
                 except FileNotFoundError:
                     print(f"skip {task_id}-{int(code) + task_n}-{round + 1}")
+            print(curves)
             curvesdf = pd.concat(list(curves.values()), axis=1)
             curvesdf = curvesdf[curvesdf.index <= steps]
+            print(f"{label} {task} {round}")
+            print(curvesdf)
             if summary == "mean":
                 summary_curve = curvesdf.mean(axis=1)
             elif summary == "median":
