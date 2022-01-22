@@ -54,7 +54,7 @@ def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, 
                     ht_data[label].append(metric)
                     mean_l.append(metric)
                     std_l.append(last.std())
-                except FileNotFoundError:
+                except Exception:
                     print(f"skip {task_id}-{int(code)+task_n}-{round+1}")
             mean_return = np.mean(mean_l)
             mean_std = np.mean(std_l)
@@ -80,6 +80,7 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
     plt.rc('xtick', labelsize='x-small')
     plt.rc('ytick', labelsize='x-small')
     plt.gcf().subplots_adjust(bottom=0.17, left=0.19)
+    print(tasks)
     for group_n, (index, label) in enumerate(zip(indexes, labels)):
         data = []
         data_std = []
@@ -103,16 +104,18 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
                         returns = (returns-random_scores) / (float(human_scores[task_n])-random_scores) *100
                     else:
                         returns = df["mean_episode_return"].ewm(span=1).mean()
-                    curves[round]=returns
-                except FileNotFoundError:
+                    curves[task]=returns
+                except Exception as e:
                     print(f"skip {task_id}-{int(code) + task_n}-{round + 1}")
-            curvesdf = pd.concat(list(curves.values()), axis=1)
-            curvesdf = curvesdf[curvesdf.index <= steps]
-            if summary == "mean":
-                summary_curve = curvesdf.mean(axis=1)
-            elif summary == "median":
-                summary_curve = curvesdf.median(axis=1)
-            data.append(summary_curve)
+            #if len(curves) == len(tasks):
+            if len(curves) > 3:
+                curvesdf = pd.concat(list(curves.values()), axis=1)
+                curvesdf = curvesdf[curvesdf.index <= steps]
+                if summary == "mean":
+                    summary_curve = curvesdf.mean(axis=1)
+                elif summary == "median":
+                    summary_curve = curvesdf.median(axis=1)
+                data.append(summary_curve)
 
         tasks_df = pd.concat(data, axis=1)
         tasks_summary = tasks_df.mean(axis=1).values.transpose()
@@ -223,7 +226,7 @@ def parse_state_portions(tasks, indexes,
                     portion.append(df["number_of_states"]/(df["step"]+1))
                     mean_l.append(last.mean())
                     std_l.append(last.std())
-                except FileNotFoundError:
+                except Exception:
                     print(f"skip {task_id}-{int(code)+task_n}-{round+1}")
             if summary == "mean":
                 summary_return = np.mean(mean_l)
@@ -236,7 +239,7 @@ def parse_state_portions(tasks, indexes,
 
     df = pd.DataFrame(data, index=tasks)
     df["relative performance"] = df[labels[1]] / df[labels[0]]
-    df = df.loc[df[label+"novel_states_ratio"]>0.1]
+    df = df.loc[df["relative performance"]>0.0]
     mean, median = df.mean(), df.median()
     print(f"correlation coefficients is {np.corrcoef(df['relative performance'], df[label+'novel_states_ratio'])}")
 
