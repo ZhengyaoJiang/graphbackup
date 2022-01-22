@@ -80,6 +80,7 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
     plt.rc('xtick', labelsize='x-small')
     plt.rc('ytick', labelsize='x-small')
     plt.gcf().subplots_adjust(bottom=0.17, left=0.19)
+    print(tasks)
     for group_n, (index, label) in enumerate(zip(indexes, labels)):
         data = []
         data_std = []
@@ -104,9 +105,10 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
                     else:
                         returns = df["mean_episode_return"].ewm(span=1).mean()
                     curves[task]=returns
-                except Exception:
+                except Exception as e:
                     print(f"skip {task_id}-{int(code) + task_n}-{round + 1}")
-            if len(curves.keys())>0:
+            #if len(curves) == len(tasks):
+            if len(curves) > 3:
                 curvesdf = pd.concat(list(curves.values()), axis=1)
                 curvesdf = curvesdf[curvesdf.index <= steps]
                 if summary == "mean":
