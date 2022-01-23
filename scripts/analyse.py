@@ -67,11 +67,10 @@ def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, 
                         raise ValueError()
                     ht_data[label].append(metric)
                     mean_l.append(metric)
-                    std_l.append(last.std())
                 except Exception:
                     print(f"skip {task_id}-{int(code)+task_n}-{round+1}")
             mean_return = np.mean(mean_l)
-            std_return = np.mean(std_l)
+            std_return = np.std(mean_l)
             data[label].append(mean_return)
             std_data[label].append(std_return)
 
