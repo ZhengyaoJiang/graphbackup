@@ -29,7 +29,7 @@ parser.add_argument("--summary", type=str, default="median")
 
 def val_with_err(df_with_err):
     val = df_with_err["average"]
-    err = df_with_err["mean"]
+    err = df_with_err["error"]
     return(f'{val:.2f}±{err:.2f}')
 
 def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, human_scores, random_scores, format="latex"):
