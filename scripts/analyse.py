@@ -32,7 +32,7 @@ def val_with_err(df_with_err):
     err = df_with_err["mean"]
     return(f'{val:.2f}±{err:.2f}')
 
-def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, human_scores, random_scores, format="text"):
+def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, human_scores, random_scores, format="latex"):
     data = {label:[] for label in labels}
     std_data = {label:[] for label in labels}
     print(tasks)
@@ -78,7 +78,7 @@ def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, 
     if format=="text":
         print(df)
     if format=="latex":
-        print(df_with_err)
+        print(df)
         print(df_with_err.to_latex())
     print(f"results for wilcoxon test")
     for (method1, data1) in ht_data.items():
