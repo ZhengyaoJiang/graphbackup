@@ -34,13 +34,16 @@ def val_with_err(df_with_err):
 
     return val+"±"+err
 
-def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, human_scores, random_scores, format="latex"):
+def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, human_scores, random_scores, format="latex", task_masks=None):
     data = {label:[] for label in labels}
     std_data = {label:[] for label in labels}
     print(tasks)
     ht_data = {label:[] for label in labels}
     for group_n, (index, label) in enumerate(zip(indexes, labels)):
         for task_n, task in enumerate(tasks):
+            if isinstance(task_masks, list):
+                if task_masks[task_n] == "0":
+                    continue
             mean_l, std_l = [], []
             for round in range(repeats):
                 task_id, code = index.split("-")
@@ -320,7 +323,8 @@ def main(flags):
                    repeats=flags.repeats, baseline=flags.baseline)
     if flags.mode == "integrate_table":
         integrate_table(flags.tasks, flags.idx, flags.labels, flags.dir, flags.steps, flags.name,
-                        repeats=flags.repeats, human_scores=flags.human_scores, random_scores=flags.random_scores, summary=flags.summary)
+                        repeats=flags.repeats, human_scores=flags.human_scores, random_scores=flags.random_scores, summary=flags.summary,
+                        task_masks=flags.task_masks)
     if flags.mode == "integrate_plot":
         integrate_plot(flags.tasks, flags.idx, flags.labels, flags.dir, flags.steps, flags.name,
                         repeats=flags.repeats, human_scores=flags.human_scores,
