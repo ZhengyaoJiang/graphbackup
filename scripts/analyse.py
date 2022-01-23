@@ -28,7 +28,7 @@ parser.add_argument("--name", type=str, default="")
 parser.add_argument("--summary", type=str, default="median")
 
 def val_with_err(df_with_err):
-    df_with_err = df_with_err.round(2).to_string()
+    df_with_err = df_with_err.round(2).astype(str)
     val = df_with_err["average"]
     err = df_with_err["error"]
 
