@@ -75,7 +75,7 @@ def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, 
             data[label].append(mean_return)
             std_data[label].append(std_return)
 
-    if task_masks:
+    if isinstance(task_masks, list):
         df = pd.DataFrame(data, index=valid_tasks)
         std_df = pd.DataFrame(std_data, index=valid_tasks)
     else:
