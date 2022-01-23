@@ -75,8 +75,12 @@ def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, 
             data[label].append(mean_return)
             std_data[label].append(std_return)
 
-    df = pd.DataFrame(data, index=valid_tasks)
-    std_df = pd.DataFrame(std_data, index=valid_tasks)
+    if task_masks:
+        df = pd.DataFrame(data, index=valid_tasks)
+        std_df = pd.DataFrame(std_data, index=valid_tasks)
+    else:
+        df = pd.DataFrame(data, index=tasks)
+        std_df = pd.DataFrame(std_data, index=tasks)
     df_with_err = pd.concat([df, std_df], keys=["average", "error"])
     df_with_err = val_with_err(df_with_err)
 
