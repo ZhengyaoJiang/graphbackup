@@ -38,12 +38,15 @@ def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, 
     data = {label:[] for label in labels}
     std_data = {label:[] for label in labels}
     print(tasks)
+    valid_tasks = []
     ht_data = {label:[] for label in labels}
     for group_n, (index, label) in enumerate(zip(indexes, labels)):
         for task_n, task in enumerate(tasks):
             if isinstance(task_masks, list):
                 if task_masks[task_n] == "0":
                     continue
+                else:
+                    valid_tasks.append(task)
             mean_l, std_l = [], []
             for round in range(repeats):
                 task_id, code = index.split("-")
@@ -72,8 +75,8 @@ def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, 
             data[label].append(mean_return)
             std_data[label].append(std_return)
 
-    df = pd.DataFrame(data, index=tasks)
-    std_df = pd.DataFrame(std_data, index=tasks)
+    df = pd.DataFrame(data, index=valid_tasks)
+    std_df = pd.DataFrame(std_data, index=valid_tasks)
     df_with_err = pd.concat([df, std_df], keys=["average", "error"])
     df_with_err = val_with_err(df_with_err)
 
