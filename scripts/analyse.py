@@ -82,7 +82,7 @@ def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, 
     if format=="latex":
         print(df)
         df = df.round(2).astype(str)
-        print(pd.concat([df_with_err, df.loc["mean", "average"]], axis=0).to_latex())
+        print(pd.concat([df_with_err, df.loc["mean", "median"]], axis=0).to_latex())
     print(f"results for wilcoxon test")
     for (method1, data1) in ht_data.items():
         for (method2, data2) in ht_data.items():
