@@ -28,9 +28,11 @@ parser.add_argument("--name", type=str, default="")
 parser.add_argument("--summary", type=str, default="median")
 
 def val_with_err(df_with_err):
+    df_with_err = df_with_err.round(2).to_string()
     val = df_with_err["average"]
     err = df_with_err["error"]
-    return(f'{val:.2f}±{err:.2f}')
+
+    return val.str.cat(err, sep='±')
 
 def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, human_scores, random_scores, format="latex"):
     data = {label:[] for label in labels}
@@ -70,7 +72,7 @@ def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, 
     df = pd.DataFrame(data, index=tasks)
     std_df = pd.DataFrame(std_data, index=tasks)
     df_with_err = pd.concat([df, std_df], keys=["average", "error"])
-    df_with_err = df_with_err.apply(val_with_err, axis=0)
+    df_with_err = val_with_err(df_with_err)
 
     mean, median = df.mean(), df.median()
     df.loc["mean"] = mean
