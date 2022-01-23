@@ -32,7 +32,7 @@ def val_with_err(df_with_err):
     val = df_with_err["average"]
     err = df_with_err["error"]
 
-    return val.str.cat(err, sep='±')
+    return val+"±"+err
 
 def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, human_scores, random_scores, format="latex"):
     data = {label:[] for label in labels}
