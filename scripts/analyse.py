@@ -45,7 +45,7 @@ def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, 
             if isinstance(task_masks, list):
                 if task_masks[task_n] == "0":
                     continue
-                else:
+                elif group_n == 0:
                     valid_tasks.append(task)
             mean_l, std_l = [], []
             for round in range(repeats):
