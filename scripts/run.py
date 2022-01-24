@@ -68,12 +68,13 @@ def build_and_train(game="pong", run_ID=0, args=None):
         eval_env_kwargs = config["eval_env"]
 
     if args.fill_missing:
-        if exists(os.path.expandvars(os.path.expanduser(os.path.join('~/logs/ava', args.exp_id)))):
+        if not exists(os.path.expandvars(os.path.expanduser(os.path.join('~/logs/ava', args.exp_id)))):
+            pass
+        elif not exists(os.path.expandvars(os.path.expanduser(os.path.join('~/logs/ava', args.exp_id, "logs.csv")))):
+            pass
+        elif os.stat(os.path.expandvars(os.path.expanduser(os.path.join('~/logs/ava', args.exp_id, "logs.csv")))).st_size >= 0:
             return
-        elif os.stat(os.path.expandvars(os.path.expanduser(os.path.join('~/logs/ava', args.exp_id)))).st_size == 0:
-            return
-        if exists(os.path.expandvars(os.path.expanduser(os.path.join('~/locallogs/ava', args.exp_id)))):
-            return
+
 
     sampler = SerialSampler(
         EnvCls=env,
