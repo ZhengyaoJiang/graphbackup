@@ -28,8 +28,8 @@ parser.add_argument("--name", type=str, default="")
 parser.add_argument("--summary", type=str, default="median")
 
 def val_with_err(df_with_err):
-    val = df_with_err.loc["average"].apply(lambda x: f"{x: .2f}")
-    err = df_with_err.loc["error"].apply(lambda x: f"{x: .2f}")
+    val = df_with_err.loc["average"].applymap(lambda x: f"{x: .2f}")
+    err = df_with_err.loc["error"].applymap(lambda x: f"{x: .2f}")
 
     return val+"±"+err
 
