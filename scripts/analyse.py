@@ -137,15 +137,18 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
             #if len(curves) == len(tasks):
             curvesdf = pd.concat(list(curves.values()), axis=1)
             curvesdf = curvesdf[curvesdf.index <= steps]
-            if summary == "mean":
-                summary_curve = curvesdf.mean(axis=1)
-            elif summary == "median":
-                summary_curve = curvesdf.median(axis=1)
-            data.append(summary_curve)
+            mean_curve = curvesdf.mean(axis=1)
+            std_curve = curvesdf.std(axis=1)
+            data.append(mean_curve)
 
-        tasks_df = pd.concat(data, axis=1)
-        tasks_summary = tasks_df.mean(axis=1).values.transpose()
-        tasks_std = tasks_df.std(axis=1).values.transpose()
+        tasks_df = pd.concat(data, axis=1, keys=labels)
+        std_df = pd.concat(std_curve, axis=1, keys=labels)
+        if summary == "mean":
+            tasks_summary = tasks_df.mean(axis=1).values.transpose()
+            tasks_std = std_curve.mean(axis=1).values.transpose()
+        elif summary == "median":
+            tasks_summary = tasks_df.median(axis=1).values.transpose()
+            tasks_std = std_curve.mean(axis=1).values.transpose()
         plt.errorbar(curvesdf.index, tasks_summary, tasks_std, linewidth=1.5, label=label, alpha=0.8, elinewidth=0.8, capsize=2.0)
         plt.xlabel('step')
         if human_scores:
