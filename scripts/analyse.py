@@ -43,7 +43,7 @@ def format_mean(input):
 
 
 def val_with_err(df_with_err):
-    val = df_with_err.loc["average"].applymap(lambda x: f"{x:.2f}")
+    val = df_with_err.loc["average"].applymap(lambda x: format_mean)
     err = df_with_err.loc["error"].applymap(lambda x: f"{x:.2f}")
 
     return val+"±"+err
@@ -104,7 +104,7 @@ def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, 
         print(df)
     if format=="latex":
         print(df)
-        df = df.round(2).astype(str)
+        df = df.applymap(format_mean)
         print(pd.concat([df_with_err, df.loc[["mean", "median"]]], axis=0).to_latex())
     print(f"results for wilcoxon test")
     for (method1, data1) in ht_data.items():
