@@ -112,9 +112,9 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
         data = []
         data_std = []
 
-        for task_n, task in enumerate(tasks):
+        for round in range(repeats):
             curves = {}
-            for round in range(repeats):
+            for task_n, task in enumerate(tasks):
                 if isinstance(task_masks, list):
                     if task_masks[task_n] == "0":
                         continue
@@ -131,24 +131,22 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
                         returns = (returns-random_scores) / (float(human_scores[task_n])-random_scores) *100
                     else:
                         returns = df["mean_episode_return"].ewm(span=1).mean()
-                    curves[round]=returns
+                    curves[task]=returns
                 except Exception as e:
                     print(f"skip {task_id}-{int(code) + task_n}-{round + 1}")
             #if len(curves) == len(tasks):
-            curvesdf = pd.concat(list(curves.values()), axis=1)
-            curvesdf = curvesdf[curvesdf.index <= steps]
-            mean_curve = curvesdf.mean(axis=1)
-            std_curve = curvesdf.std(axis=1)
-            data.append(mean_curve)
+            if len(curves) > 3:
+                curvesdf = pd.concat(list(curves.values()), axis=1)
+                curvesdf = curvesdf[curvesdf.index <= steps]
+                if summary == "mean":
+                    summary_curve = curvesdf.mean(axis=1)
+                elif summary == "median":
+                    summary_curve = curvesdf.median(axis=1)
+                data.append(summary_curve)
 
-        tasks_df = pd.concat(data, axis=1, keys=labels)
-        std_df = pd.concat(std_curve, axis=1, keys=labels)
-        if summary == "mean":
-            tasks_summary = tasks_df.mean(axis=1).values.transpose()
-            tasks_std = std_curve.mean(axis=1).values.transpose()
-        elif summary == "median":
-            tasks_summary = tasks_df.median(axis=1).values.transpose()
-            tasks_std = std_curve.mean(axis=1).values.transpose()
+        tasks_df = pd.concat(data, axis=1)
+        tasks_summary = tasks_df.mean(axis=1).values.transpose()
+        tasks_std = tasks_df.std(axis=1).values.transpose()
         plt.errorbar(curvesdf.index, tasks_summary, tasks_std, linewidth=1.5, label=label, alpha=0.8, elinewidth=0.8, capsize=2.0)
         plt.xlabel('step')
         if human_scores:
