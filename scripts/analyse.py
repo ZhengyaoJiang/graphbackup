@@ -279,7 +279,7 @@ def parse_state_portions(tasks, indexes,
             data[label+"novel_states_ratio"].append(mean_portion)
 
     df = pd.DataFrame(data, index=tasks)
-    df["relative performance"] = df[labels[1]] / df[labels[0]]
+    df["relative performance"] = df[labels[1]] - df[labels[0]]
     df = df.loc[df["relative performance"]>0.0]
     mean, median = df.mean(), df.median()
     print(f"correlation coefficients is {np.corrcoef(df['relative performance'], df[label+'novel_states_ratio'])}")
