@@ -285,6 +285,7 @@ def parse_state_portions(tasks, indexes1, indexes2,
     df["relative performance"] = df[labels[1]] - df[labels[0]]
     df = df.loc[df[labels[1]]!=0.0]
     mean, median = df.mean(), df.median()
+    print(f"{df['relative performance']}, {df[label+'novel_states_ratio']}")
     print(f"correlation coefficients is {np.corrcoef(df['relative performance'], df[label+'novel_states_ratio'])}")
 
     fig = plt.figure(figsize=(6.0, 4.5))
