@@ -248,39 +248,38 @@ def parse_state_portions(tasks, indexes,
                          labels, dir, steps, name, repeats, summary, human_scores, random_scores):
     data = {label:[] for label in labels}
     print(tasks)
-    for group_n, (index, label) in enumerate(zip(indexes, labels)):
+    for task_n, (index, label) in enumerate(zip(indexes, labels)):
         data[label+"novel_states_ratio"] = []
-        for task_n, task in enumerate(tasks):
-            mean_l, std_l = [], []
-            portion = []
-            for round in range(repeats):
-                task_id, code = index.split("-")
-                try:
-                    df = pd.read_csv(os.path.join(dir, f"{task_id}-{int(code)+task_n}-{round+1}", "logs.csv"))
-                    nb_mean = (len(df["mean_episode_return"])+1) // 10
-                    if human_scores:
-                        last = df["mean_episode_return"].iloc[-nb_mean:]# / human_scores[task_n] * 100
-                        random_score = float(random_scores[task_n])
-                        last = (last-random_score) / (float(human_scores[task_n])-random_score) *100
-                    else:
-                        last = df["mean_episode_return"].iloc[-nb_mean:]# / human_scores[task_n] * 100
-                    portion.append(df["number_of_states"]/(df["step"]+1))
-                    mean_l.append(last.mean())
-                    std_l.append(last.std())
-                except Exception:
-                    print(f"skip {task_id}-{int(code)+task_n}-{round+1}")
-            if summary == "mean":
-                summary_return = np.mean(mean_l)
-            elif summary == "median":
-                summary_return = np.median(mean_l)
-            mean_std = np.mean(std_l)
-            mean_portion = np.mean(portion)
-            data[label].append(summary_return)
-            data[label+"novel_states_ratio"].append(mean_portion)
+        mean_l, std_l = [], []
+        portion = []
+        for round in range(repeats):
+            task_id, code = index.split("-")
+            try:
+                df = pd.read_csv(os.path.join(dir, f"{task_id}-{int(code)}-{round+1}", "logs.csv"))
+                nb_mean = (len(df["mean_episode_return"])+1) // 10
+                if human_scores:
+                    last = df["mean_episode_return"].iloc[-nb_mean:]# / human_scores[task_n] * 100
+                    random_score = float(random_scores[task_n])
+                    last = (last-random_score) / (float(human_scores[task_n])-random_score) *100
+                else:
+                    last = df["mean_episode_return"].iloc[-nb_mean:]# / human_scores[task_n] * 100
+                portion.append(df["number_of_states"]/(df["step"]+1))
+                mean_l.append(last.mean())
+                std_l.append(last.std())
+            except Exception:
+                print(f"skip {task_id}-{int(code)}-{round+1}")
+        if summary == "mean":
+            summary_return = np.mean(mean_l)
+        elif summary == "median":
+            summary_return = np.median(mean_l)
+        mean_std = np.mean(std_l)
+        mean_portion = np.mean(portion)
+        data[label].append(summary_return)
+        data[label+"novel_states_ratio"].append(mean_portion)
 
     df = pd.DataFrame(data, index=tasks)
     df["relative performance"] = df[labels[1]] - df[labels[0]]
-    df = df.loc[df["relative performance"]>0.0]
+    df = df.loc[df[labels[1]]!=0.0]
     mean, median = df.mean(), df.median()
     print(f"correlation coefficients is {np.corrcoef(df['relative performance'], df[label+'novel_states_ratio'])}")
 
