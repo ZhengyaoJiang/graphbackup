@@ -251,9 +251,9 @@ def parse_state_portions(tasks, indexes1, indexes2,
     data = {label:[] for label in labels}
     print(tasks)
     for label_nb, label in enumerate(labels):
+        data[label + "novel_states_ratio"] = []
         indexes = indexes1 if label_nb==0 else indexes2
         for task_n, index in enumerate(indexes):
-            data[label+"novel_states_ratio"] = []
             mean_l, std_l = [], []
             portion = []
             for round in range(repeats):
