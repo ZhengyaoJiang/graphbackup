@@ -46,6 +46,10 @@ cd atari
 python scripts/run.py --game=breakout --exp_id=T-3-1 --seed=1 --num-logs=10 --spr=0 --backup=graph --augmentation none --target-augmentation 0 --momentum-tau 0.01 --n-step=10 --breath=10 --architecture=spr --learning_rate=0.0001 --limit_sample_method=uniform
 ```
 
+## For Practitioners
+For practitioners who want to apply graph backup to their own projects or adapt graph backup to other algorithms. We recommand they check [gbsampler.py](https://github.com/ZhengyaoJiang/graphbackup/blob/main/atari/src/gbsampler.py) where we packed up most of the important logics for graph backup in a single file.
+This includes building of the graph and using the resultant graph for value estimation.
+
 ## Reference
 ```
 @article{jiang2022graphbackup,
