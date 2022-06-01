@@ -6,7 +6,7 @@ Abstract:
 
 ![introimg](img/intro.png)
 
-The figure above shows the (a) the transition graph of a Atari game, Frostbite; (b) the backup diagrams for different backup methods.
+The figure above shows the (a) the transition graph of an Atari game, Frostbite; (b) the backup diagrams for different backup methods. Graph backup will exploit the graph structure of tranistions to produce a value estimation.
 
 
 The implementation of vanilla DQN for MiniGrid and MinAtar is based on https://github.com/Kaixhin/Rainbow, under the directory `gridworld` .
