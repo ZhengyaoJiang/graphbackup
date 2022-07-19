@@ -218,7 +218,7 @@ class SPRCategoricalDQN(CategoricalDQN):
                                                 source_indexes=samples.state_index[index].cpu().numpy(),
                                                 visualize=visualize,
                                                 limit_sample_method=self.limit_sample_method)
-
+                y = select_at_indexes(samples.all_action[index+1], target_q)
             elif self.backup == "tree":
                 if self.visualize_local_period == -1:
                     visualize = False
