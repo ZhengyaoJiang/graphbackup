@@ -1,7 +1,9 @@
-gym[atari]
+gym[atari]==0.13.0
+atari-py
 wandb
 opencv-python
 scikit-learn
+ray
 recordclass
 matplotlib
 wandb
@@ -10,6 +12,8 @@ numpy
 pyprind
 pandas
 seaborn
-gym_minigrid
+gym_minigrid==1.0.2
 networkx
+pympler
+minatar
 -e git+https://github.com/astooke/rlpyt.git@b32d589d12d31ba3c8a9cfb7a3c85c6e350b2904#egg=rlpyt
