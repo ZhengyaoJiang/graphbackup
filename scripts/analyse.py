@@ -1,5 +1,6 @@
 import seaborn as sns
 import numpy as np
+import scipy
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
@@ -41,11 +42,11 @@ def format_mean(input):
         nb_spaces = 2
     elif input>-1000:
         nb_spaces = 3
-    return "_"*nb_spaces+f"{input:.2f}"
+    return " "*nb_spaces+f"{input:.2f}"
 
 
 def val_with_err(df_with_err):
-    val = df_with_err.loc["average"].applymap(lambda x: format_mean)
+    val = df_with_err.loc["average"].applymap(lambda x: format_mean(x))
     err = df_with_err.loc["error"].applymap(lambda x: f"{x:.2f}")
 
     return val+"±"+err
@@ -53,9 +54,11 @@ def val_with_err(df_with_err):
 def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, human_scores, random_scores, format="latex", task_masks=None):
     data = {label:[] for label in labels}
     std_data = {label:[] for label in labels}
+    all_runs = {label: [] for label in labels}
     print(tasks)
     valid_tasks = []
     ht_data = {label:[] for label in labels}
+    steps = int(steps // 1000)
     for group_n, (index, label) in enumerate(zip(indexes, labels)):
         for task_n, task in enumerate(tasks):
             if isinstance(task_masks, list):
@@ -68,13 +71,14 @@ def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, 
                 task_id, code = index.split("-")
                 try:
                     df = pd.read_csv(os.path.join(dir, f"{task_id}-{int(code)+task_n}-{round+1}", "logs.csv"))
-                    nb_mean = (len(df["mean_episode_return"])+1) // 10
+                    #nb_mean = (len(df["mean_episode_return"])+1) // 10
+                    nb_mean = 1
                     if human_scores:
                         last = df["mean_episode_return"].iloc[-nb_mean:]# / human_scores[task_n] * 100
                         random_score = float(random_scores[task_n])
                         last = (last-random_score) / (float(human_scores[task_n])-random_score) *100
                     else:
-                        last = df["mean_episode_return"].iloc[-nb_mean:]# / human_scores[task_n] * 100
+                        last = df["mean_episode_return"].iloc[steps-nb_mean:steps]# / human_scores[task_n] * 100
                     if summary == "mean":
                         metric = last.mean()
                     elif summary == "median":
@@ -83,31 +87,42 @@ def integrate_table(tasks, indexes, labels, dir, steps, name, repeats, summary, 
                         raise ValueError()
                     ht_data[label].append(metric)
                     mean_l.append(metric)
+                    print(f"{task_id}-{int(code)+task_n}-{round+1} {last} {summary}: {metric}")
                 except Exception:
+                    ht_data[label].append(metric)
+                    mean_l.append(metric)
                     print(f"skip {task_id}-{int(code)+task_n}-{round+1}")
-            mean_return = np.mean(mean_l)
+            mean_return = np.nanmean(mean_l)
             std_return = np.std(mean_l)
             data[label].append(mean_return)
+            all_runs[label].append(mean_l)
             std_data[label].append(std_return)
 
+    for group_n, (index, label) in enumerate(zip(indexes, labels)):
+        print(label)
+        print(all_runs[label])
+        all_runs[label] = [scipy.stats.trim_mean(np.concatenate(all_runs[label], axis=0), 0.25, axis=None)]
     if isinstance(task_masks, list):
         df = pd.DataFrame(data, index=valid_tasks)
-        std_df = pd.DataFrame(std_data, index=valid_tasks)
+        std_df = pd.DataFrame(std_data, index=valid_tasks)/np.sqrt(5)
     else:
         df = pd.DataFrame(data, index=tasks)
-        std_df = pd.DataFrame(std_data, index=tasks)
+        std_df = pd.DataFrame(std_data, index=tasks)/np.sqrt(5)
     df_with_err = pd.concat([df, std_df], keys=["average", "error"])
     df_with_err = val_with_err(df_with_err)
 
     mean, median = df.mean(), df.median()
+    print(all_runs)
     df.loc["mean"] = mean
     df.loc["median"] = median
+    df.loc["IQM"] = pd.DataFrame(all_runs)
     if format=="text":
         print(df)
     if format=="latex":
         print(df)
         df = df.applymap(format_mean)
-        print(pd.concat([df_with_err, df.loc[["mean", "median"]]], axis=0).to_latex())
+        print(pd.concat([df_with_err, df.loc[["mean", "median", "IQM"]]], axis=0).to_latex())
+    print(pd.concat([df_with_err, df.loc[["mean", "median", "IQM"]]], axis=0).to_markdown())
     print(f"results for wilcoxon test")
     for (method1, data1) in ht_data.items():
         for (method2, data2) in ht_data.items():
@@ -147,6 +162,7 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
                         returns = (returns-random_scores) / (float(human_scores[task_n])-random_scores) *100
                     else:
                         returns = df["mean_episode_return"].ewm(span=1).mean()
+                    #returns = returns[::10]
                     curves[task]=returns
                 except Exception as e:
                     print(f"skip {task_id}-{int(code) + task_n}-{round + 1}")
@@ -162,7 +178,7 @@ def integrate_plot(tasks, indexes, labels, dir, steps, name, repeats, summary, h
 
         tasks_df = pd.concat(data, axis=1)
         tasks_summary = tasks_df.mean(axis=1).values.transpose()
-        tasks_std = tasks_df.std(axis=1).values.transpose()
+        tasks_std = tasks_df.std(axis=1).values.transpose()/np.sqrt(repeats)
         plt.errorbar(curvesdf.index, tasks_summary, tasks_std, linewidth=1.5, label=label, alpha=0.8, elinewidth=0.8, capsize=2.0)
         plt.xlabel('step')
         if human_scores:
