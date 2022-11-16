@@ -31,13 +31,13 @@ To run mingrid experiments:
 
 ```bash
 cd gridworld
-python core/run.py --id=T-1-1 --exp_group=T-1 --env=MiniGrid-KeyCorridorS3R1-v0 --num_steps 1000000 --seed=1 --disable_noisy --disable_dist --priority-exponent=0.0 --disable_duelling --disable_noisy --distill_steps=1 --buffer_sample=uniform --initialization=distilled --multi-step=10 --backup_target=graph-limited --buffer_key=transition --branching_limit=50 --backup_target_update --discount=0.95 --learning-rate=0.001
+python core/run.py --id=T-1-1 --exp_group=T-1 --env=MiniGrid-KeyCorridorS3R1-v0 --num_steps 100000 --seed=1 --disable_noisy --disable_dist --priority-exponent=0.0 --disable_duelling --disable_noisy --distill_steps=1 --buffer_sample=uniform --initialization=distilled --multi-step=10 --backup_target=graph-limited --buffer_key=transition --branching_limit=50 --backup_target_update --discount=0.95 --learning-rate=0.001
 ```
 
 To run minatar experiments:
 ```bash
 cd gridworld
-python core/run.py --id=T-2-1 --exp_group=T-2 --env=Minatar-seaquest --num_steps 1000000 --seed=1 --disable_noisy --disable_dist --priority-exponent=0.0 --disable_duelling --disable_noisy --distill_steps=1 --buffer_sample=uniform --initialization=distilled --multi-step=5 --backup_target=graph-limited --buffer_key=transition --branching_limit=20 --backup_target_update --hidden-size=256 --learning-rate=0.000065 --learn-start=1600 --target-update=8000 --replay-frequency=4
+python core/run.py --id=T-2-1 --exp_group=T-2 --env=Minatar-seaquest --num_steps 100000 --seed=1 --disable_noisy --disable_dist --priority-exponent=0.0 --disable_duelling --disable_noisy --distill_steps=1 --buffer_sample=uniform --initialization=distilled --multi-step=5 --backup_target=graph-limited --buffer_key=transition --branching_limit=20 --backup_target_update --hidden-size=256 --learning-rate=0.000065 --learn-start=1600 --target-update=8000 --replay-frequency=4
 ```
 
 To run atari experiments:
